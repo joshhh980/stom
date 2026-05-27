@@ -9,27 +9,33 @@ if ($qry->num_rows > 0) {
 <div class="d-none">
     <div class="p-2" id="print_out">
         <style>
-            @page {
-                margin: 2px 2px 80px 2px;
-                size: 80mm auto !important;
-                font-family: 'Courier New', Courier !important;
-            }
+            @media print {
+    @page {
+        /* Set all margins to zero to stop the printer from centering */
+        margin: 0;
+    }
 
-            .table-font {
-                font-size: 40px;
-            }
+    body {
+        /* Control the actual receipt width here instead of in @page */
+        width: 80mm; 
+        margin: 2px 2px 80px 2px;
+        font-family: 'Courier New', Courier !important;
+    }
 
-            .table-bordered-4 {
-                border-style: dashed;
-            }
+    .table-font {
+        font-size: 40px;
+    }
 
-            .table-bordered-4 td {
-                border-color: black !important;
-            }
+    .table-bordered-4 {
+        border-style: dashed;
+        width: 100%; /* Force the table to use the 80mm body width */
+    }
 
-            .table-bordered-4 th {
-                border-color: black !important;
-            }
+    .table-bordered-4 td,
+    .table-bordered-4 th {
+        border-color: black !important;
+    }
+}
         </style>
         <div class="container-fluid">
 
