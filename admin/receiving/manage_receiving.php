@@ -114,7 +114,6 @@ if(isset($_GET['bo_id'])){
                         <tr class="text-light bg-navy">
                             <th class="text-center py-1 px-2"></th>
                             <th class="text-center py-1 px-2">Qty</th>
-                            <th class="text-center py-1 px-2">Unit</th>
                             <th class="text-center py-1 px-2">Item</th>
                             <th class="text-center py-1 px-2">Cost</th>
                             <th class="text-center py-1 px-2">Total</th>
@@ -144,13 +143,9 @@ if(isset($_GET['bo_id'])){
                             <td class="py-1 px-2 text-center qty">
                                 <input type="number" name="qty[]" style="width:50px !important" value="<?php echo $row['qty']; ?>" max = "<?php echo $row['quantity']; ?>" min="0">
                                 <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
-                                <input type="hidden" name="unit[]" value="<?php echo $row['unit']; ?>">
                                 <input type="hidden" name="oqty[]" value="<?php echo $row['quantity']; ?>">
                                 <input type="hidden" name="price[]" value="<?php echo $row['price']; ?>">
                                 <input type="hidden" name="total[]" value="<?php echo $row['total']; ?>">
-                            </td>
-                            <td class="py-1 px-2 text-center unit">
-                            <?php echo $row['unit']; ?>
                             </td>
                             <td class="py-1 px-2 item">
                             <?php echo $row['name']; ?> <br>
@@ -168,23 +163,23 @@ if(isset($_GET['bo_id'])){
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="5">Sub Total</th>
+                            <th class="text-right py-1 px-2" colspan="4">Sub Total</th>
                             <th class="text-right py-1 px-2 sub-total">0</th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="5">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="4">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
                                 <input type="hidden" name="discount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 discount"><?php echo isset($discount) ? number_format($discount) : 0 ?></th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="5">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="4">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
                                 <input type="hidden" name="tax" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 tax"><?php echo isset($tax) ? number_format($tax) : 0 ?></th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="5">Total
+                            <th class="text-right py-1 px-2" colspan="4">Total
                                 <input type="hidden" name="amount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 grand-total">0</th>
