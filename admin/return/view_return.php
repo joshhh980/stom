@@ -36,7 +36,6 @@ if($qry->num_rows >0){
                 <thead>
                     <tr class="text-light bg-navy">
                         <th class="text-center py-1 px-2">Qty</th>
-                        <th class="text-center py-1 px-2">Unit</th>
                         <th class="text-center py-1 px-2">Item</th>
                         <th class="text-center py-1 px-2">Cost</th>
                         <th class="text-center py-1 px-2">Total</th>
@@ -51,7 +50,6 @@ if($qry->num_rows >0){
                     ?>
                     <tr>
                         <td class="py-1 px-2 text-center"><?php echo number_format($row['quantity']) ?></td>
-                        <td class="py-1 px-2 text-center"><?php echo ($row['unit']) ?></td>
                         <td class="py-1 px-2">
                             <?php echo $row['name'] ?> <br>
                             <?php echo $row['description'] ?>
@@ -94,12 +92,9 @@ if($qry->num_rows >0){
         <td class="py-1 px-2 text-center qty">
             <span class="visible"></span>
             <input type="hidden" name="item_id[]">
-            <input type="hidden" name="unit[]">
             <input type="hidden" name="qty[]">
             <input type="hidden" name="price[]">
             <input type="hidden" name="total[]">
-        </td>
-        <td class="py-1 px-2 text-center unit">
         </td>
         <td class="py-1 px-2 item">
         </td>

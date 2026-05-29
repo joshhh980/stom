@@ -52,7 +52,7 @@ if(isset($_GET['id'])){
                 <hr>
                 <fieldset>
                     <legend class="text-info">Item Form</legend>
-                    <div class="row justify-content-center align-items-end">
+                    <div class="row justify-content-start align-items-end">
                             <?php 
                                 $item_arr = array();
                                 $cost_arr = array();
@@ -68,12 +68,6 @@ if(isset($_GET['id'])){
                                 <select  id="item_id" class="custom-select ">
                                     <option disabled selected></option>
                                 </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="unit" class="control-label">Unit</label>
-                                <input type="text" class="form-control rounded-0" id="unit">
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -102,7 +96,6 @@ if(isset($_GET['id'])){
                         <tr class="text-light bg-navy">
                             <th class="text-center py-1 px-2"></th>
                             <th class="text-center py-1 px-2">Qty</th>
-                            <th class="text-center py-1 px-2">Unit</th>
                             <th class="text-center py-1 px-2">Item</th>
                             <th class="text-center py-1 px-2">Cost</th>
                             <th class="text-center py-1 px-2">Total</th>
@@ -123,13 +116,9 @@ if(isset($_GET['id'])){
                             <td class="py-1 px-2 text-center qty">
                                 <span class="visible"><?php echo number_format($row['quantity']); ?></span>
                                 <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
-                                <input type="hidden" name="unit[]" value="<?php echo $row['unit']; ?>">
                                 <input type="hidden" name="qty[]" value="<?php echo $row['quantity']; ?>">
                                 <input type="hidden" name="price[]" value="<?php echo $row['price']; ?>">
                                 <input type="hidden" name="total[]" value="<?php echo $row['total']; ?>">
-                            </td>
-                            <td class="py-1 px-2 text-center unit">
-                            <?php echo $row['unit']; ?>
                             </td>
                             <td class="py-1 px-2 item">
                             <?php echo $row['name']; ?> <br>
@@ -178,12 +167,9 @@ if(isset($_GET['id'])){
         <td class="py-1 px-2 text-center qty">
             <span class="visible"></span>
             <input type="hidden" name="item_id[]">
-            <input type="hidden" name="unit[]">
             <input type="hidden" name="qty[]">
             <input type="hidden" name="price[]">
             <input type="hidden" name="total[]">
-        </td>
-        <td class="py-1 px-2 text-center unit">
         </td>
         <td class="py-1 px-2 item">
         </td>
@@ -243,14 +229,13 @@ if(isset($_GET['id'])){
             var supplier = $('#supplier_id').val()
             var item = $('#item_id').val()
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
-            var unit = $('#unit').val()
             var price = costs[item] || 0
             var total = parseFloat(qty) *parseFloat(price)
             // console.log(supplier,item)
             var item_name = items[supplier][item].name || 'N/A';
             var item_description = items[supplier][item].description || 'N/A';
             var tr = $('#clone_list tr').clone()
-            if(item == '' || qty == '' || unit == '' ){
+            if(item == '' || qty == '' ){
                 alert_toast('Form Item textfields are required.','warning');
                 return false;
             }
@@ -259,13 +244,11 @@ if(isset($_GET['id'])){
                 return false;
             }
             tr.find('[name="item_id[]"]').val(item)
-            tr.find('[name="unit[]"]').val(unit)
             tr.find('[name="qty[]"]').val(qty)
             tr.find('[name="price[]"]').val(price)
             tr.find('[name="total[]"]').val(total)
             tr.attr('data-id',item)
             tr.find('.qty .visible').text(qty)
-            tr.find('.unit').text(unit)
             tr.find('.item').html(item_name+'<br/>'+item_description)
             tr.find('.cost').text(parseFloat(price).toLocaleString('en-US'))
             tr.find('.total').text(parseFloat(total).toLocaleString('en-US'))
@@ -273,7 +256,6 @@ if(isset($_GET['id'])){
             calc()
             $('#item_id').val('').trigger('change')
             $('#qty').val('')
-            $('#unit').val('')
             tr.find('.rem_row').click(function(){
                 rem($(this))
             })
