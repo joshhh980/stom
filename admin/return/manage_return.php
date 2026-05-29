@@ -136,7 +136,7 @@ if(isset($_GET['id'])){
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="5">Total
+                            <th class="text-right py-1 px-2" colspan="4">Total
                                 <input type="hidden" name="amount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 grand-total">0</th>
