@@ -36,7 +36,6 @@ if($qry->num_rows >0){
                 <thead>
                     <tr class="text-light bg-navy">
                         <th class="text-center py-1 px-2">Qty</th>
-                        <th class="text-center py-1 px-2">Unit</th>
                         <th class="text-center py-1 px-2">Item</th>
                         <th class="text-center py-1 px-2">Cost</th>
                         <th class="text-center py-1 px-2">Total</th>
@@ -51,7 +50,6 @@ if($qry->num_rows >0){
                     ?>
                     <tr>
                         <td class="py-1 px-2 text-center"><?php echo number_format($row['quantity'],2) ?></td>
-                        <td class="py-1 px-2 text-center"><?php echo ($row['unit']) ?></td>
                         <td class="py-1 px-2">
                             <?php echo $row['name'] ?> <br>
                             <?php echo $row['description'] ?>
@@ -65,19 +63,19 @@ if($qry->num_rows >0){
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th class="text-right py-1 px-2" colspan="4">Sub Total</th>
+                        <th class="text-right py-1 px-2" colspan="3">Sub Total</th>
                         <th class="text-right py-1 px-2 sub-total"><?php echo number_format($total,2)  ?></th>
                     </tr>
                     <tr>
-                        <th class="text-right py-1 px-2" colspan="4">Discount <?php echo isset($discount_perc) ? $discount_perc : 0 ?>%</th>
+                        <th class="text-right py-1 px-2" colspan="3">Discount <?php echo isset($discount_perc) ? $discount_perc : 0 ?>%</th>
                         <th class="text-right py-1 px-2 discount"><?php echo isset($discount) ? number_format($discount,2) : 0 ?></th>
                     </tr>
                     <tr>
-                        <th class="text-right py-1 px-2" colspan="4">Tax <?php echo isset($tax_perc) ? $tax_perc : 0 ?>%</th>
+                        <th class="text-right py-1 px-2" colspan="3">Tax <?php echo isset($tax_perc) ? $tax_perc : 0 ?>%</th>
                         <th class="text-right py-1 px-2 tax"><?php echo isset($tax) ? number_format($tax,2) : 0 ?></th>
                     </tr>
                     <tr>
-                        <th class="text-right py-1 px-2" colspan="4">Total</th>
+                        <th class="text-right py-1 px-2" colspan="3">Total</th>
                         <th class="text-right py-1 px-2 grand-total"><?php echo isset($amount) ? number_format($amount,2) : 0 ?></th>
                     </tr>
                 </tfoot>
@@ -111,12 +109,9 @@ if($qry->num_rows >0){
         <td class="py-1 px-2 text-center qty">
             <span class="visible"></span>
             <input type="hidden" name="item_id[]">
-            <input type="hidden" name="unit[]">
             <input type="hidden" name="qty[]">
             <input type="hidden" name="price[]">
             <input type="hidden" name="total[]">
-        </td>
-        <td class="py-1 px-2 text-center unit">
         </td>
         <td class="py-1 px-2 item">
         </td>
