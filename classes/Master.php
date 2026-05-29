@@ -389,126 +389,7 @@ Class Master extends DBConnection {
 		return json_encode($resp);
 
 	}
-	function delete_bo(){
-		extract($_POST);
-		$bo =$this->conn->query("SELECT * FROM `back_order_list` where id = '{$id}'");
-		if($bo->num_rows >0)
-		$bo_res = $bo->fetch_array();
-		$del = $this->conn->query("DELETE FROM `back_order_list` where id = '{$id}'");
-		if($del){
-			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success',"po's Details Successfully deleted.");
-			$qry = $this->conn->query("SELECT `stock_ids` from  receiving_list where form_id='{$id}' and from_order = '2' ");
-			if($qry->num_rows > 0){
-				$res = $qry->fetch_array();
-				$ids = $res['stock_ids'];
-				$this->conn->query("DELETE FROM stock_list where id in ($ids) ");
-
-				$this->conn->query("DELETE FROM receiving_list where form_id='{$id}' and from_order = '2' ");
-			}
-			if(isset($bo_res)){
-				$check = $this->conn->query("SELECT * FROM `receiving_list` where from_order = 1 and form_id = '{$bo_res['po_id']}' ");
-				if($check->num_rows > 0){
-					$this->conn->query("UPDATE `purchase_order_list` set status = 1 where id = '{$bo_res['po_id']}' ");
-				}else{
-					$this->conn->query("UPDATE `purchase_order_list` set status = 0 where id = '{$bo_res['po_id']}' ");
-				}
-			}
-		}else{
-			$resp['status'] = 'failed';
-			$resp['error'] = $this->conn->error;
-		}
-		return json_encode($resp);
-	}
-	function save_return(){
-		if(empty($_POST['id'])){
-			$prefix = "R";
-			$code = sprintf("%'.04d",1);
-			while(true){
-				$check_code = $this->conn->query("SELECT * FROM `return_list` where return_code ='".$prefix.'-'.$code."' ")->num_rows;
-				if($check_code > 0){
-					$code = sprintf("%'.04d",$code+1);
-				}else{
-					break;
-				}
-			}
-			$_POST['return_code'] = $prefix."-".$code;
-		}
-		extract($_POST);
-		$data = "";
-		foreach($_POST as $k =>$v){
-			if(!in_array($k,array('id')) && !is_array($_POST[$k])){
-				if(!is_numeric($v))
-				$v= $this->conn->real_escape_string($v);
-				if(!empty($data)) $data .=", ";
-				$data .=" `{$k}` = '{$v}' ";
-			}
-		}
-		if(empty($id)){
-			$sql = "INSERT INTO `return_list` set {$data}";
-		}else{
-			$sql = "UPDATE `return_list` set {$data} where id = '{$id}'";
-		}
-		$save = $this->conn->query($sql);
-		if($save){
-			$resp['status'] = 'success';
-			if(empty($id))
-			$return_id = $this->conn->insert_id;
-			else
-			$return_id = $id;
-			$resp['id'] = $return_id;
-			$data = "";
-			$sids = array();
-			$get = $this->conn->query("SELECT * FROM `return_list` where id = '{$return_id}'");
-			if($get->num_rows > 0){
-				$res = $get->fetch_array();
-				if(!empty($res['stock_ids'])){
-					$this->conn->query("DELETE FROM `stock_list` where id in ({$res['stock_ids']}) ");
-				}
-			}
-			foreach($item_id as $k =>$v){
-				$sql = "INSERT INTO `stock_list` set item_id='{$v}', `quantity` = '{$qty[$k]}', `unit` = '{$unit[$k]}', `price` = '{$price[$k]}', `total` = '{$total[$k]}', `type` = 2 ";
-				$save = $this->conn->query($sql);
-				if($save){
-					$sids[] = $this->conn->insert_id;
-				}
-			}
-			$sids = implode(',',$sids);
-			$this->conn->query("UPDATE `return_list` set stock_ids = '{$sids}' where id = '{$return_id}'");
-		}else{
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
-		}
-		if($resp['status'] == 'success'){
-			if(empty($id)){
-				$this->settings->set_flashdata('success'," New Returned Item Record was Successfully created.");
-			}else{
-				$this->settings->set_flashdata('success'," Returned Item Record's Successfully updated.");
-			}
-		}
-
-		return json_encode($resp);
-	}
-	function delete_return(){
-		extract($_POST);
-		$get = $this->conn->query("SELECT * FROM return_list where id = '{$id}'");
-		if($get->num_rows > 0){
-			$res = $get->fetch_array();
-		}
-		$del = $this->conn->query("DELETE FROM `return_list` where id = '{$id}'");
-		if($del){
-			$resp['status'] = 'success';
-			$this->settings->set_flashdata('success',"Returned Item Record's Successfully deleted.");
-			if(isset($res)){
-				$this->conn->query("DELETE FROM `stock_list` where id in ({$res['stock_ids']})");
-			}
-		}else{
-			$resp['status'] = 'failed';
-			$resp['error'] = $this->conn->error;
-		}
-		return json_encode($resp);
-
-	}
+	
 	function save_sale(){
 		if(empty($_POST['id'])){
 			$prefix = "SALE";
@@ -630,12 +511,6 @@ switch ($action) {
 	break;
 	case 'delete_receiving':
 		echo $Master->delete_receiving();
-	break;
-	case 'save_return':
-		echo $Master->save_return();
-	break;
-	case 'delete_return':
-		echo $Master->delete_return();
 	break;
 	case 'save_sale':
 		echo $Master->save_sale();
