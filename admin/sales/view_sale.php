@@ -169,7 +169,7 @@ if ($qry->num_rows > 0) {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th class="text-right py-1 px-2" colspan="4">Total</th>
+                        <th class="text-right py-1 px-2" colspan="3">Total</th>
                         <th class="text-right py-1 px-2 grand-total"><?php echo isset($amount) ? number_format($amount, 2) : 0 ?></th>
                     </tr>
                 </tfoot>

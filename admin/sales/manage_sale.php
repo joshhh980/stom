@@ -46,21 +46,67 @@ if(isset($_GET['id'])){
                     <legend class="text-info">Item Form</legend>
                     <div class="row justify-content-start align-items-end">
                             <?php 
-                                $item_arr = array();
+                               
+                               $item_arr = array();
+                                $_items_arr = array();
                                 $cost_arr = array();
-                                $item = $conn->query("SELECT * FROM `item_list` where status = 1 order by `name` asc");
-                                while($row=$item->fetch_assoc()):
-                                    $item_arr[$row['id']] = $row;
-                                    $cost_arr[$row['id']] = $row['cost'];
+                                $items = $conn->query("SELECT * FROM `item_list` where status = 1 order by `name` asc");
+                                while($row=$items->fetch_assoc()):
+                                    $_items_arr[$row['id']] = $row;
                                 endwhile;
+                                $stock_items = $conn->query("SELECT * FROM `stock_list`");
+                                while($stock_row=$stock_items->fetch_assoc()):
+                                    $stock_items_arr[$stock_row['id']] = $stock_row;
+                                endwhile;
+
+                                $stock_counts = [];
+
+                                foreach ($_items_arr as $key => $item) {
+                                    $stock_counts[$item['id']] = [
+                                        "id" => $item['id'],
+                                        "name" => $item["name"],
+                                        'stock' => 0,
+                                        "cost" => $item['cost'],
+                                    ];
+                                }
+
+
+                                foreach ($stock_items_arr as $stock_item) {
+                                    $item_id = $stock_item['item_id'];
+                                    $type = (int)$stock_item['type'];
+                                    $quantity = (float)$stock_item['quantity'];
+
+                                    // Skip if the item doesn't exist in our item list
+                                    if (!isset($stock_counts[$item_id])) {
+                                        continue;
+                                    }
+
+                                    if ($type === 1) {
+                                        $stock_counts[$item_id]['stock'] += $quantity;
+                                    } elseif ($type === 2) {
+                                        $stock_counts[$item_id]['stock'] -= $quantity;
+                                    }
+                                }
+
+                               foreach ($stock_counts as $item_id => $item_data) {
+                                    if ($item_data['stock'] > 0) {
+                                        $item_arr[$item_data['id']] = $stock_counts[$item_data['id']];
+                                        $cost_arr[$item_data['id']] = $_items_arr[$item_data['id']]['cost'];
+                                    }
+                                }
+                                
+
                             ?>
                         <div class="col-md-3">
+                            <?php foreach ($stock_counts as $key => $stock_item) :?>
+                                <input type="hidden" id="<?= $stock_item["id"] ?>" value="<?= $stock_item["stock"] ?>" >
+                            <?php endforeach; ?>
                             <div class="form-group">
                                 <label for="item_id" class="control-label">Item</label>
                                 <select  id="item_id" class="custom-select select2">
                                     <option disabled selected></option>
-                                    <?php foreach($item_arr as $k =>$v): ?>
-                                        <option value="<?php echo $k ?>"> <?php echo $v['name'] ?></option>
+                                    <?php foreach($item_arr as $item_id =>$item): ?>
+                                        <option value="<?php echo $item_id ?>"> <?php echo $item['name'] . " - GHS " . $item['cost'] ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -184,8 +230,14 @@ if(isset($_GET['id'])){
             width:'resolve',
         })
         $('#add_to_list').click(function(){
-            var item = $('#item_id').val()
+            var itemEl = $('#item_id')
+            var item = itemEl.val()
+            var stock = $(`#${item}`).val()            
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
+            if(qty > stock){
+                alert_toast('Item quantity exceedes stock.','error');
+                return;
+            }
             var price = costs[item] || 0
             var total = parseFloat(qty) *parseFloat(price)
             // console.log(supplier,item)
