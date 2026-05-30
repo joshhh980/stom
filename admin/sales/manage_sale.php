@@ -54,7 +54,8 @@ if(isset($_GET['id'])){
                                 while($row=$items->fetch_assoc()):
                                     $_items_arr[$row['id']] = $row;
                                 endwhile;
-                                $stock_items = $conn->query("SELECT * FROM `stock_list`");
+                                $currentDate = date('Y-m-d');
+                                $stock_items = $conn->query("SELECT * FROM `stock_list` where stock_list.expiry_date > '{$currentDate}'");
                                 while($stock_row=$stock_items->fetch_assoc()):
                                     $stock_items_arr[$stock_row['id']] = $stock_row;
                                 endwhile;

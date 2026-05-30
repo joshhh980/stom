@@ -30,7 +30,12 @@
                     <tbody>
                         <?php 
                         $i = 1;
-                        $qry = $conn->query("SELECT i.*,s.name as supplier FROM `item_list` i inner join supplier_list s on i.supplier_id = s.id order by `name` desc");
+						$currentDate = date('Y-m-d');
+                        $qry = $conn->query("SELECT i.*,s.name as supplier FROM `item_list` i 
+						 inner join supplier_list s on i.supplier_id = s.id
+						 inner join stock_list on i.id = stock_list.item_id
+						 where stock_list.expiry_date > '{$currentDate}'
+						 order by `name` desc");
                         while($row = $qry->fetch_assoc()):
                             $in = $conn->query("SELECT SUM(quantity) as total FROM stock_list where item_id = '{$row['id']}' and type = 1")->fetch_array()['total'];
                             $out = $conn->query("SELECT SUM(quantity) as total FROM stock_list where item_id = '{$row['id']}' and type = 2")->fetch_array()['total'];

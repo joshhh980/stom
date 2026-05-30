@@ -62,6 +62,18 @@ if(isset($_GET['id'])){
                                 <input name="quantity" type="number" step="any" class="form-control rounded-0" id="qty">
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="expiry_date" class="control-label">Expiry Date</label>
+                                <input type="date" class="form-control rounded-0" id="expiry_date" name="expiry_date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="batch_no" class="control-label">Batch No</label>
+                                <input class="form-control rounded-0" id="batch_no" name="batch_no">
+                            </div>
+                        </div>
                         <div class="col-md-2 text-center">
                             <div class="form-group">
                                 <button type="submit" class="btn btn-flat btn-primary">Add to Stock</button>

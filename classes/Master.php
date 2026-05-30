@@ -164,11 +164,11 @@ Class Master extends DBConnection {
 			$data = "";
 			foreach($item_id as $k =>$v){
 				if(!empty($data)) $data .=", ";
-				$data .= "('{$po_id}','{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}')";
+				$data .= "('{$po_id}','{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}', '{$expiry_date[$k]}', '{$batch_no[$k]}')";
 			}
 			if(!empty($data)){
 				$this->conn->query("DELETE FROM `po_items` where po_id = '{$po_id}'");
-				$save = $this->conn->query("INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`unit`,`total`) VALUES {$data}");
+				$save = $this->conn->query("INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`unit`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
 				if(!$save){
 					$resp['status'] = 'failed';
 					if(empty($id)){
@@ -284,7 +284,7 @@ Class Master extends DBConnection {
 			$stock_ids= array();
 			foreach($item_id as $k =>$v){
 				if(!empty($data)) $data .=", ";
-				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`) VALUES ('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}','1')";
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`) VALUES ('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}','1', '{$expiry_date[$k]}')";
 				$this->conn->query($sql);
 				$stock_ids[] = $this->conn->insert_id;
 				if($qty[$k] < $oqty[$k]){
@@ -485,7 +485,9 @@ Class Master extends DBConnection {
 		$qty = $_POST['quantity'];
 		$price = $_POST['price'];
 		$total = $_POST['total'];
-		$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`type`) VALUES ('{$item_id}','{$qty}','1')";
+		$expiry_date = $_POST['expiry_date'];
+		$batch_no = $_POST['batch_no'];
+		$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
 		$save = $this->conn->query($sql);
 		if($save){
 			$resp['status'] = 'success';

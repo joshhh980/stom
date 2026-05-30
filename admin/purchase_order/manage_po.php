@@ -76,6 +76,18 @@ if(isset($_GET['id'])){
                                 <input type="number" step="any" class="form-control rounded-0" id="qty">
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="expiry_date" class="control-label">Expiry Date</label>
+                                <input type="date" class="form-control rounded-0" id="expiry_date">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="batch_no" class="control-label">Batch No</label>
+                                <input class="form-control rounded-0" id="batch_no">
+                            </div>
+                        </div>
                         <div class="col-md-2 text-center">
                             <div class="form-group">
                                 <button type="button" class="btn btn-flat btn-sm btn-primary" id="add_to_list">Add to List</button>
@@ -97,6 +109,8 @@ if(isset($_GET['id'])){
                             <th class="text-center py-1 px-2"></th>
                             <th class="text-center py-1 px-2">Qty</th>
                             <th class="text-center py-1 px-2">Item</th>
+                            <th class="text-center py-1 px-2">Expiry Date</th>
+                            <th class="text-center py-1 px-2">Batch No</th>
                             <th class="text-center py-1 px-2">Cost</th>
                             <th class="text-center py-1 px-2">Total</th>
                         </tr>
@@ -117,12 +131,20 @@ if(isset($_GET['id'])){
                                 <span class="visible"><?php echo number_format($row['quantity']); ?></span>
                                 <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
                                 <input type="hidden" name="qty[]" value="<?php echo $row['quantity']; ?>">
+                                <input type="hidden" name="expiry_date[]" value="<?php echo $row['expiry_date']; ?>">
+                                <input type="hidden" name="batch_no[]" value="<?php echo $row['batch_no']; ?>">
                                 <input type="hidden" name="price[]" value="<?php echo $row['price']; ?>">
                                 <input type="hidden" name="total[]" value="<?php echo $row['total']; ?>">
                             </td>
                             <td class="py-1 px-2 item">
                             <?php echo $row['name']; ?> <br>
                             <?php echo $row['description']; ?>
+                            </td>
+                            <td class="py-1 px-2 expiry_date">
+                            <?php echo $row['expiry_date']; ?>
+                            </td>
+                            <td class="py-1 px-2 batch_no">
+                            <?php echo $row['batch_no']; ?>
                             </td>
                             <td class="py-1 px-2 text-right cost">
                             <?php echo number_format($row['price']); ?>
@@ -136,23 +158,23 @@ if(isset($_GET['id'])){
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="4">Sub Total</th>
+                            <th class="text-right py-1 px-2" colspan="6">Sub Total</th>
                             <th class="text-right py-1 px-2 sub-total">0</th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="4">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="6">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
                                 <input type="hidden" name="discount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 discount"><?php echo isset($discount) ? number_format($discount) : 0 ?></th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="4">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="6">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
                                 <input type="hidden" name="tax" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 tax"><?php echo isset($tax) ? number_format($tax) : 0 ?></th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="4">Total
+                            <th class="text-right py-1 px-2" colspan="6">Total
                                 <input type="hidden" name="amount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 grand-total">0</th>
@@ -184,10 +206,16 @@ if(isset($_GET['id'])){
             <span class="visible"></span>
             <input type="hidden" name="item_id[]">
             <input type="hidden" name="qty[]">
+            <input type="hidden" name="expiry_date[]" >
+            <input type="hidden" name="batch_no[]" >
             <input type="hidden" name="price[]">
             <input type="hidden" name="total[]">
         </td>
         <td class="py-1 px-2 item">
+        </td>
+        <td class="py-1 px-2 expiry_date">
+        </td>
+        <td class="py-1 px-2 batch_no">
         </td>
         <td class="py-1 px-2 text-right cost">
         </td>
@@ -247,6 +275,9 @@ if(isset($_GET['id'])){
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
             var price = costs[item] || 0
             var total = parseFloat(qty) *parseFloat(price)
+
+            var expiry_date = $('#expiry_date').val();
+            var batch_no = $('#batch_no').val();
             // console.log(supplier,item)
             var item_name = items[supplier][item].name || 'N/A';
             var item_description = items[supplier][item].description || 'N/A';
@@ -263,15 +294,24 @@ if(isset($_GET['id'])){
             tr.find('[name="qty[]"]').val(qty)
             tr.find('[name="price[]"]').val(price)
             tr.find('[name="total[]"]').val(total)
+            tr.find('[name="expiry_date[]"]').val(expiry_date)
+            tr.find('[name="batch_no[]"]').val(batch_no)
             tr.attr('data-id',item)
             tr.find('.qty .visible').text(qty)
             tr.find('.item').html(item_name+'<br/>'+item_description)
             tr.find('.cost').text(parseFloat(price).toLocaleString('en-US'))
+            
             tr.find('.total').text(parseFloat(total).toLocaleString('en-US'))
+            
+            tr.find('.expiry_date').text(expiry_date)
+            tr.find('.batch_no').text(batch_no)
+
             $('table#list tbody').append(tr)
             calc()
             $('#item_id').val('').trigger('change')
             $('#qty').val('')
+            $('expiry_date').val('')
+            $('#batch_no').val('')
             tr.find('.rem_row').click(function(){
                 rem($(this))
             })
