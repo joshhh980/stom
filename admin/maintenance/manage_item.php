@@ -43,6 +43,20 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 			<option value="0" <?php echo isset($status) && $status == 0 ? 'selected' : '' ?>>Inactive</option>
 			</select>
 		</div>
+		<?php if(!isset($_GET['id'])): ?>
+		<div class="form-group">
+			<label for="quantity" class="control-label">Quantity</label>
+			<input type="number" class="form-control" id="quantity" name="quantity">
+		</div>
+		<div class="form-group">
+			<label for="expiry_date" class="control-label">Expiry Date</label>
+			<input type="date" class="form-control" id="expiry_date" name="expiry_date">
+		</div>
+		<div class="form-group">
+			<label for="batch_no" class="control-label">Batch No</label>
+			<input class="form-control" id="batch_no" name="batch_no">
+		</div>
+		<?php endif; ?>
 	</form>
 </div>
 <script>

@@ -79,8 +79,10 @@ Class Master extends DBConnection {
 		foreach($_POST as $k =>$v){
 			if(!in_array($k,array('id'))){
 				$v = $this->conn->real_escape_string($v);
+				if(!in_array($k, ["quantity", "expiry_date", "batch_no"])){
 				if(!empty($data)) $data .=",";
 				$data .= " `{$k}`='{$v}' ";
+				}
 			}
 		}
 		$check = $this->conn->query("SELECT * FROM `item_list` where `name` = '{$name}' and `supplier_id` = '{$supplier_id}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
@@ -95,6 +97,13 @@ Class Master extends DBConnection {
 		if(empty($id)){
 			$sql = "INSERT INTO `item_list` set {$data} ";
 			$save = $this->conn->query($sql);
+			$qty = $_POST['quantity'];
+			$expiry_date = $_POST['expiry_date'];
+			$batch_no = $_POST['batch_no'];
+			$item_id = $this->conn->insert_id;
+			$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
+			$save = $this->conn->query($sql);
+		
 		}else{
 			$sql = "UPDATE `item_list` set {$data} where id = '{$id}' ";
 			$save = $this->conn->query($sql);
