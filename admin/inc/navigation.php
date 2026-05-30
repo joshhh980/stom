@@ -40,6 +40,14 @@
                       </a>
                     </li>
                     <li class="nav-item">
+                      <a href="<?php echo base_url ?>admin/?page=back_order" class="nav-link nav-back_order">
+                        <i class="nav-icon fas fa-exchange-alt"></i>
+                        <p>
+                          Back Order
+                        </p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
                       <a href="<?php echo base_url ?>admin/?page=receiving" class="nav-link nav-receiving">
                         <i class="nav-icon fas fa-boxes"></i>
                         <p>

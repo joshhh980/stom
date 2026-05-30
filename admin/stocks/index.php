@@ -35,6 +35,7 @@
 						 inner join supplier_list s on i.supplier_id = s.id
 						 inner join stock_list on i.id = stock_list.item_id
 						 where stock_list.expiry_date > '{$currentDate}'
+						 GROUP BY i.id
 						 order by `name` desc");
                         while($row = $qry->fetch_assoc()):
                             $in = $conn->query("SELECT SUM(quantity) as total FROM stock_list where item_id = '{$row['id']}' and type = 1")->fetch_array()['total'];

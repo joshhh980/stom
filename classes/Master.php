@@ -281,25 +281,24 @@ Class Master extends DBConnection {
 		$save = $this->conn->query($sql);
 		if($save){
 			$resp['status'] = 'success';
-			if(empty($id))
-			$r_id = $this->conn->insert_id;
-			else
-			$r_id = $id;
+			if(empty($id)) $r_id = $this->conn->insert_id;
+			else $r_id = $id;
 			$resp['id'] = $r_id;
-			if(!empty($id)){
-				$stock_ids = $this->conn->query("SELECT stock_ids FROM `receiving_list` where id = '{$id}'")->fetch_array()['stock_ids'];
-				$this->conn->query("DELETE FROM `stock_list` where id in ({$stock_ids})");
+			if(!empty($r_id)){
+				$stock_ids = $this->conn->query("SELECT stock_ids FROM `receiving_list` where id = '{$r_id}'")->fetch_array()['stock_ids'];
+				$this->conn->query("DELETE FROM `stock_list` where id = {$stock_ids}");
 			}
 			$stock_ids= array();
 			foreach($item_id as $k =>$v){
 				if(!empty($data)) $data .=", ";
-				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`) VALUES ('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}','1', '{$expiry_date[$k]}')";
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`, `batch_no`) VALUES ('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}','1', '{$expiry_date[$k]}', '{$batch_no[$k]}')";
 				$this->conn->query($sql);
 				$stock_ids[] = $this->conn->insert_id;
 				if($qty[$k] < $oqty[$k]){
 					$bo_ids[] = $k;
 				}
 			}
+
 			if(count($stock_ids) > 0){
 				$stock_ids = implode(',',$stock_ids);
 				$this->conn->query("UPDATE `receiving_list` set stock_ids = '{$stock_ids}' where id = '{$r_id}'");
@@ -324,7 +323,7 @@ Class Master extends DBConnection {
 							po_id = '{$form_id}',	
 							supplier_id = '{$supplier_id}',	
 							discount_perc = '{$discount_perc}',	
-							tax_perc = '{$tax_perc}',
+							tax_perc = '{$tax_perc}'
 							where bo_id = '{$bo_id}'
 						";
 				}
@@ -339,10 +338,10 @@ Class Master extends DBConnection {
 					$total = ($oqty[$k] - $qty[$k]) * $price[$k];
 					$stotal += $total;
 					if(!empty($data)) $data.= ", ";
-					$data .= " ('{$bo_id}','{$v}','".($oqty[$k] - $qty[$k])."','{$price[$k]}','{$unit[$k]}','{$total}') ";
+					$data .= " ('{$bo_id}','{$v}','".($oqty[$k] - $qty[$k])."','{$price[$k]}','{$total}', '{$expiry_date[$k]}', '{$batch_no[$k]}') ";
 				}
 				$this->conn->query("DELETE FROM `bo_items` where bo_id='{$bo_id}'");
-				$save_bo_items = $this->conn->query("INSERT INTO `bo_items` (`bo_id`,`item_id`,`quantity`,`price`,`unit`,`total`) VALUES {$data}");
+				$save_bo_items = $this->conn->query("INSERT INTO `bo_items` (`bo_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
 				if($save_bo_items){
 					$discount = $stotal * ($discount_perc /100);
 					$stotal -= $discount;

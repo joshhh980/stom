@@ -48,5 +48,10 @@ function isMobileDevice(){
     //Otherwise return false..  
     return false;
 }
+
+    define("PURCHASE_ORDER_PENDING", 0);
+    define("PURCHASE_ORDER_PARTIALLY", 1);
+    define("PURCHASE_ORDER_RECEIVED", 2);
+
 ob_end_flush();
 ?>

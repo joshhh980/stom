@@ -1,5 +1,5 @@
 <?php 
-$qry = $conn->query("SELECT p.*,s.name as supplier FROM purchase_order_list p inner join supplier_list s on p.supplier_id = s.id  where p.id = '{$_GET['id']}'");
+$qry = $conn->query("SELECT b.*,s.name as supplier,p.po_code FROM back_order_list b inner join supplier_list s on b.supplier_id = s.id inner join purchase_order_list p on b.po_id = p.id  where b.id = '{$_GET['id']}'");
 if($qry->num_rows >0){
     foreach($qry->fetch_array() as $k => $v){
         $$k = $v;
@@ -8,13 +8,13 @@ if($qry->num_rows >0){
 ?>
 <div class="card card-outline card-primary">
     <div class="card-header">
-        <h4 class="card-title">Purchase Order Details - <?php echo $po_code ?></h4>
+        <h4 class="card-title">Back Order Details - <?php echo $bo_code ?></h4>
     </div>
     <div class="card-body" id="print_out">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
-                    <label class="control-label text-info">P.O. Code</label>
+                    <label class="control-label text-info">From P.O. Code</label>
                     <div><?php echo isset($po_code) ? $po_code : '' ?></div>
                 </div>
                 <div class="col-md-6">
@@ -22,6 +22,10 @@ if($qry->num_rows >0){
                         <label for="supplier_id" class="control-label text-info">Supplier</label>
                         <div><?php echo isset($supplier) ? $supplier : '' ?></div>
                     </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="control-label text-info">B.O. Code</label>
+                    <div><?php echo isset($bo_code) ? $bo_code : '' ?></div>
                 </div>
             </div>
             <h4 class="text-info">Orders</h4>
@@ -46,7 +50,7 @@ if($qry->num_rows >0){
                 <tbody>
                     <?php 
                     $total = 0;
-                    $qry = $conn->query("SELECT p.*,i.name,i.description FROM `po_items` p inner join item_list i on p.item_id = i.id where p.po_id = '{$id}'");
+                    $qry = $conn->query("SELECT b.*,i.name,i.description FROM `bo_items` b inner join item_list i on b.item_id = i.id where b.bo_id = '{$id}'");
                     while($row = $qry->fetch_assoc()):
                         $total += $row['total']
                     ?>
@@ -88,7 +92,7 @@ if($qry->num_rows >0){
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="remarks" class="text-info control-label">Remarks</label>
-                        <p><?php echo isset($remarks) ? $remarks : '' ?></p>
+                        <p><?php echo isset($remarks) ? $remarks : 'N/A' ?></p>
                     </div>
                 </div>
                 <?php if($status > 0): ?>
@@ -100,10 +104,7 @@ if($qry->num_rows >0){
         </div>
     </div>
     <div class="card-footer py-1 text-center">
-        <?php if($status == PURCHASE_ORDER_PENDING): ?>
-            <a class="btn btn-flat btn-primary" href="<?php echo base_url.'/admin?page=purchase_order/manage_po&id='.(isset($id) ? $id : '') ?>">Edit</a>
-        <?php endif; ?>
-        <a class="btn btn-flat btn-dark" href="<?php echo base_url.'/admin?page=purchase_order' ?>">Back To List</a>
+        <a class="btn btn-flat btn-dark" href="<?php echo base_url.'/admin?page=back_order' ?>">Back To List</a>
     </div>
 </div>
 <table id="clone_list" class="d-none">
