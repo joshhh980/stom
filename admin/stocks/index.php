@@ -1,9 +1,11 @@
 <div class="card card-outline card-primary">
 	<div class="card-header">
 		<h3 class="card-title">List of Stocks</h3>
-        <!-- <div class="card-tools">
-			<a href="<?php echo base_url ?>admin/?page=purchase_order/manage_po" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
-		</div> -->
+        <?php if($_settings->userdata('type') == 1): ?>
+			<div class="card-tools">
+				<a href="<?php echo base_url ?>admin/?page=stocks/manage_stock" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
+			</div>
+		<?php endif;?>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">

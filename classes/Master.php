@@ -479,6 +479,24 @@ Class Master extends DBConnection {
 		return json_encode($resp);
 
 	}
+
+	function save_stock(){
+		$item_id = $_POST['item_id'];
+		$qty = $_POST['quantity'];
+		$price = $_POST['price'];
+		$total = $_POST['total'];
+		$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`type`) VALUES ('{$item_id}','{$qty}','1')";
+		$save = $this->conn->query($sql);
+		if($save){
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success',"Stock Added Successfully.");
+		}else{
+			$resp['status'] = 'failed';
+			$resp['error'] = $this->conn->error;
+		}
+				return json_encode($resp);
+
+	}
 }
 
 $Master = new Master();
@@ -517,6 +535,9 @@ switch ($action) {
 	break;
 	case 'delete_sale':
 		echo $Master->delete_sale();
+	break;
+	case 'save_stock':
+		echo $Master->save_stock();
 	break;
 	default:
 		// echo $sysset->index();
