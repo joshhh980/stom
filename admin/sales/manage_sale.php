@@ -198,7 +198,7 @@ if(isset($_GET['id'])){
     </div>
     <div class="card-footer py-1 text-center">
         <button class="btn btn-flat btn-primary" type="submit" form="sale-form">Save</button>
-        <a class="btn btn-flat btn-dark" href="<?php echo base_url.'/admin?page=sale' ?>">Cancel</a>
+        <a class="btn btn-flat btn-dark" href="<?php echo base_url.'/admin?page=sales' ?>">Cancel</a>
     </div>
 </div>
 <table id="clone_list" class="d-none">
