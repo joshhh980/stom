@@ -101,8 +101,10 @@ Class Master extends DBConnection {
 			$expiry_date = $_POST['expiry_date'];
 			$batch_no = $_POST['batch_no'];
 			$item_id = $this->conn->insert_id;
-			$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
-			$save = $this->conn->query($sql);
+			if($qty != ""){
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
+				$save = $this->conn->query($sql);
+			}
 		
 		}else{
 			$sql = "UPDATE `item_list` set {$data} where id = '{$id}' ";
@@ -173,18 +175,27 @@ Class Master extends DBConnection {
 			$data = "";
 			foreach($item_id as $k =>$v){
 				if(!empty($data)) $data .=", ";
-				$data .= "('{$po_id}','{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}', '{$expiry_date[$k]}', '{$batch_no[$k]}')";
+				$_expiry_date = $expiry_date[$k] ?? NULL;
+				$_batch_no = $batch_no[$k] ?? NULL;
+
+				$expiry_date_val = (!empty($_expiry_date)) ? "'".$this->conn->real_escape_string($_expiry_date)."'" : "NULL";
+				$batch_no_val = (!empty($_batch_no)) ? "'".$this->conn->real_escape_string($_batch_no)."'" : "NULL";
+
+				$data .= "('{$po_id}','{$v}','{$qty[$k]}','{$price[$k]}','{$total[$k]}'";
+				$data .= ",{$expiry_date_val}";
+				$data .= ",{$batch_no_val}";
+				$data .= ")";
 			}
 			if(!empty($data)){
 				$this->conn->query("DELETE FROM `po_items` where po_id = '{$po_id}'");
-				$save = $this->conn->query("INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`unit`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
+				$save = $this->conn->query("INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
 				if(!$save){
 					$resp['status'] = 'failed';
 					if(empty($id)){
 						$this->conn->query("DELETE FROM `purchase_order_list` where id '{$po_id}'");
 					}
 					$resp['msg'] = 'PO has failed to save. Error: '.$this->conn->error;
-					$resp['sql'] = "INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`unit`,`total`) VALUES {$data}";
+					$resp['sql'] = "INSERT INTO `po_items` (`po_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}";
 				}
 			}
 		}else{
@@ -286,7 +297,7 @@ Class Master extends DBConnection {
 			$resp['id'] = $r_id;
 			if(!empty($r_id)){
 				$stock_ids = $this->conn->query("SELECT stock_ids FROM `receiving_list` where id = '{$r_id}'")->fetch_array()['stock_ids'];
-				$this->conn->query("DELETE FROM `stock_list` where id = {$stock_ids}");
+				$this->conn->query("DELETE FROM `stock_list` where id in ({$stock_ids})");
 			}
 			$stock_ids= array();
 			foreach($item_id as $k =>$v){
@@ -495,7 +506,13 @@ Class Master extends DBConnection {
 		$total = $_POST['total'];
 		$expiry_date = $_POST['expiry_date'];
 		$batch_no = $_POST['batch_no'];
-		$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
+
+		$expiry_date_val = (!empty($expiry_date)) ? "'".$this->conn->real_escape_string($expiry_date)."'" : "NULL";
+		$batch_no_val = (!empty($batch_no)) ? "'".$this->conn->real_escape_string($batch_no)."'" : "NULL";
+
+
+
+		$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', {$expiry_date_val}, {$batch_no_val},'1')";
 		$save = $this->conn->query($sql);
 		if($save){
 			$resp['status'] = 'success';
