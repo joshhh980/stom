@@ -72,6 +72,9 @@ if(isset($_GET['bo_id'])){
             <input type="hidden" name="from_order" value="<?php echo isset($bo_id) ? 2 : 1 ?>">
             <input type="hidden" name="form_id" value="<?php echo isset($bo_id) ? $bo_id : $po_id ?>">
             <input type="hidden" name="po_id" value="<?php echo isset($po_id) ? $po_id : '' ?>">
+            <?php if($_settings->userdata('type') == 1): ?>
+                <input name="date_created" type="hidden" class="form-control form-control-sm rounded-0" value="<?php echo isset($date_created) ? $date_created : '' ?>">
+            <?php endif; ?>
             <div class="container-fluid">
                 <div class="row">
                     <?php if(!isset($bo_id)): ?>
@@ -112,7 +115,10 @@ if(isset($_GET['bo_id'])){
                     </colgroup>
                     <thead>
                         <tr class="text-light bg-navy">
-                            <th class="text-center py-1 px-2"></th>
+                            <!--
+                                                    <th class="text-center py-1 px-2"></th>
+
+                            -->
                             <th class="text-center py-1 px-2">Qty</th>
                             <th class="text-center py-1 px-2">Item</th>
                             <th class="text-center py-1 px-2">Expiry Date</th>
@@ -139,9 +145,11 @@ if(isset($_GET['bo_id'])){
                             }
                         ?>
                         <tr>
-                            <td class="py-1 px-2 text-center">
+                        <!-- 
+                        <td class="py-1 px-2 text-center">
                                 <button class="btn btn-outline-danger btn-sm rem_row" type="button"><i class="fa fa-times"></i></button>
                             </td>
+                        -->
                             <td class="py-1 px-2 text-center qty">
                                 <input type="number" name="qty[]" style="width:50px !important" value="<?php echo $row['qty']; ?>" max = "<?php echo $row['quantity']; ?>" min="0">
                                 <input type="hidden" name="item_id[]" value="<?php echo $row['item_id']; ?>">
