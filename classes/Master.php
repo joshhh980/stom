@@ -338,7 +338,8 @@ Class Master extends DBConnection {
 							po_id = '{$po_id}',	
 							supplier_id = '{$supplier_id}',	
 							discount_perc = '{$discount_perc}',	
-							tax_perc = '{$tax_perc}'
+							tax_perc = '{$tax_perc}',
+							date_created = '{$date_created}'
 						";
 				}else{
 					$sql = "UPDATE `back_order_list` set 
@@ -346,7 +347,8 @@ Class Master extends DBConnection {
 							po_id = '{$form_id}',	
 							supplier_id = '{$supplier_id}',	
 							discount_perc = '{$discount_perc}',	
-							tax_perc = '{$tax_perc}'
+							tax_perc = '{$tax_perc}',
+							date_created = '{$date_created}'
 							where bo_id = '{$bo_id}'
 						";
 				}
