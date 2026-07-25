@@ -363,7 +363,16 @@ Class Master extends DBConnection {
 					$total = ($oqty[$k] - $qty[$k]) * $price[$k];
 					$stotal += $total;
 					if(!empty($data)) $data.= ", ";
-					$data .= " ('{$bo_id}','{$v}','".($oqty[$k] - $qty[$k])."','{$price[$k]}','{$total}', '{$expiry_date[$k]}', '{$batch_no[$k]}') ";
+					$_expiry_date = $expiry_date[$k] ?? NULL;
+				$_batch_no = $batch_no[$k] ?? NULL;
+
+				$expiry_date_val = (!empty($_expiry_date)) ? "'".$this->conn->real_escape_string($_expiry_date)."'" : "NULL";
+				$batch_no_val = (!empty($_batch_no)) ? "'".$this->conn->real_escape_string($_batch_no)."'" : "NULL";
+
+				$data .= "('{$bo_id}', '{$v}','".($oqty[$k] - $qty[$k])."','{$price[$k]}','{$total}'";
+				$data .= ",{$expiry_date_val}";
+				$data .= ",{$batch_no_val}";
+				$data .= ")";
 				}
 				$this->conn->query("DELETE FROM `bo_items` where bo_id='{$bo_id}'");
 				$save_bo_items = $this->conn->query("INSERT INTO `bo_items` (`bo_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
