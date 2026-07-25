@@ -48,6 +48,14 @@ if(isset($_GET['id'])){
                             </select>
                         </div>
                     </div>
+                    <?php if($_settings->userdata('type') == 1): ?>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="date_created" class="control-label text-info">Date Created</label>
+                            <input name="date_created" id="date_created" type="date" class="form-control form-control-sm rounded-0" value="<?= isset($date_created) ? date('Y-m-d', strtotime($date_created)) : '' ?>">
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <hr>
                 <fieldset>
