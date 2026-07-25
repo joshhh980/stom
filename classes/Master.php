@@ -240,6 +240,8 @@ Class Master extends DBConnection {
 
 	}
 	function save_receiving(){
+		    $this->conn->begin_transaction();
+			try {
 		if(empty($_POST['id'])){
 			$prefix = "BO";
 			$code = sprintf("%'.04d",1);
@@ -301,8 +303,18 @@ Class Master extends DBConnection {
 			}
 			$stock_ids= array();
 			foreach($item_id as $k =>$v){
-				if(!empty($data)) $data .=", ";
-				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`, `batch_no`) VALUES ('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}','1', '{$expiry_date[$k]}', '{$batch_no[$k]}')";
+				$stock_data = "";
+				$_expiry_date = $expiry_date[$k] ?? NULL;
+				$_batch_no = $batch_no[$k] ?? NULL;
+
+				$expiry_date_val = (!empty($_expiry_date)) ? "'".$this->conn->real_escape_string($_expiry_date)."'" : "NULL";
+				$batch_no_val = (!empty($_batch_no)) ? "'".$this->conn->real_escape_string($_batch_no)."'" : "NULL";
+
+				$stock_data .= "('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}', 1";
+				$stock_data .= ",{$expiry_date_val}";
+				$stock_data .= ",{$batch_no_val}";
+				$stock_data .= ")";
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`, `batch_no`) VALUES {$stock_data}";
 				$this->conn->query($sql);
 				$stock_ids[] = $this->conn->insert_id;
 				if($qty[$k] < $oqty[$k]){
@@ -369,8 +381,8 @@ Class Master extends DBConnection {
 				}
 			}
 		}else{
-			$resp['status'] = 'failed';
-			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
+			throw new Exception($this->conn->error);
+				
 		}
 		if($resp['status'] == 'success'){
 			if(empty($id)){
@@ -379,9 +391,16 @@ Class Master extends DBConnection {
 				$this->settings->set_flashdata('success'," Received Stock's Details Successfully updated.");
 			}
 		}
+		    $this->conn->commit();
 
 		return json_encode($resp);
-	}
+			}catch(Exception $e){
+				    $this->conn->rollback();
+				$resp['status'] = 'failed';
+			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
+
+			}
+		}
 	function delete_receiving(){
 		extract($_POST);
 		$qry = $this->conn->query("SELECT * from  receiving_list where id='{$id}' ");
