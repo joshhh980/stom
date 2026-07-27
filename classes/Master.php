@@ -1,5 +1,7 @@
 <?php
 require_once('../config.php');
+require_once('./Api.php');
+
 Class Master extends DBConnection {
 	private $settings;
 	public function __construct(){
@@ -310,11 +312,11 @@ Class Master extends DBConnection {
 				$expiry_date_val = (!empty($_expiry_date)) ? "'".$this->conn->real_escape_string($_expiry_date)."'" : "NULL";
 				$batch_no_val = (!empty($_batch_no)) ? "'".$this->conn->real_escape_string($_batch_no)."'" : "NULL";
 
-				$stock_data .= "('{$v}','{$qty[$k]}','{$price[$k]}','{$unit[$k]}','{$total[$k]}', 1";
+				$stock_data .= "('{$v}','{$qty[$k]}','{$price[$k]}','{$total[$k]}', 1";
 				$stock_data .= ",{$expiry_date_val}";
 				$stock_data .= ",{$batch_no_val}";
 				$stock_data .= ")";
-				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`unit`,`total`,`type`, `expiry_date`, `batch_no`) VALUES {$stock_data}";
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`,`price`,`total`,`type`, `expiry_date`, `batch_no`) VALUES {$stock_data}";
 				$this->conn->query($sql);
 				$stock_ids[] = $this->conn->insert_id;
 				if($qty[$k] < $oqty[$k]){
@@ -558,7 +560,8 @@ Class Master extends DBConnection {
 
 $Master = new Master();
 $action = !isset($_GET['f']) ? 'none' : strtolower($_GET['f']);
-$sysset = new SystemSettings();
+$sysset = new SystemSettings();		
+$api = new Api();
 switch ($action) {
 	case 'save_supplier':
 		echo $Master->save_supplier();
@@ -595,6 +598,9 @@ switch ($action) {
 	break;
 	case 'save_stock':
 		echo $Master->save_stock();
+	break;
+	case 'import_stock':
+		echo $api->importData();
 	break;
 	default:
 		// echo $sysset->index();
