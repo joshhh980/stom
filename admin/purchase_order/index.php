@@ -1,9 +1,26 @@
 <div class="card card-outline card-primary">
 	<div class="card-header">
 		<h3 class="card-title">List of Purchase Orders</h3>
-        <div class="card-tools">
-			<a href="<?php echo base_url ?>admin/?page=purchase_order/manage_po" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
-		</div>
+        <div class="card-tools d-flex justify-content-between">
+            <div>
+			<a href="<?php echo 'http://localhost/sms/' ?>admin/?page=purchase_order/manage_po" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
+
+        </div>
+<div class="position-relative d-inline-block ml-2">
+    <form action="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=import_stock&receive=true' ?>" method="POST" enctype="multipart/form-data">
+        <input 
+               type="file" name="excel_file" accept=".xlsx, .xls, .csv" required>
+        <button class="btn btn-flat btn-primary position-relative" type="submit">Upload and Receive</button>
+    </form>
+</div>
+<div class="position-relative d-inline-block ml-2">
+    <form action="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=import_stock' ?>" method="POST" enctype="multipart/form-data">
+        <input
+               type="file" name="excel_file" accept=".xlsx, .xls, .csv" required>
+        <button class="btn btn-flat btn-primary position-relative" type="submit">Upload</button>
+    </form>
+</div>
+        </div>
 	</div>
 	<div class="card-body">
 		<div class="container-fluid">

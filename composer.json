@@ -1,0 +1,7 @@
+{
+    "name": "user/sms",
+    "type": "project",
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.30"
+    }
+}
