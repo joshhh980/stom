@@ -406,13 +406,15 @@ Class Master extends DBConnection {
 		}
 		    $this->conn->commit();
 
-		return json_encode($resp);
 			}catch(Exception $e){
 				    $this->conn->rollback();
 				$resp['status'] = 'failed';
 			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
 
 			}
+
+					return json_encode($resp);
+
 		}
 	function delete_receiving(){
 		extract($_POST);
