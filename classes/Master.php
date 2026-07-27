@@ -300,9 +300,15 @@ Class Master extends DBConnection {
 			else $r_id = $id;
 			$resp['id'] = $r_id;
 			if(!empty($r_id)){
-				$stock_ids = $this->conn->query("SELECT stock_ids FROM `receiving_list` where id = '{$r_id}'")->fetch_array()['stock_ids'];
-				$this->conn->query("DELETE FROM `stock_list` where id in ({$stock_ids})");
+				$result = $this->conn->query("SELECT stock_ids FROM `receiving_list` where id = '{$r_id}'")->fetch_array();
+				$stock_ids = $result['stock_ids'] ?? '';
+				
+				// Only run delete if $stock_ids is not empty and not just whitespace
+				if(!empty(trim($stock_ids))){
+					$this->conn->query("DELETE FROM `stock_list` where id in ({$stock_ids})");
+				}
 			}
+
 			$stock_ids= array();
 			foreach($item_id as $k =>$v){
 				$stock_data = "";
@@ -377,7 +383,11 @@ Class Master extends DBConnection {
 				$data .= ")";
 				}
 				$this->conn->query("DELETE FROM `bo_items` where bo_id='{$bo_id}'");
-				$save_bo_items = $this->conn->query("INSERT INTO `bo_items` (`bo_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
+				if(!empty($data)){
+					$save_bo_items = $this->conn->query("INSERT INTO `bo_items` (`bo_id`,`item_id`,`quantity`,`price`,`total`, `expiry_date`, `batch_no`) VALUES {$data}");
+				} else {
+					$save_bo_items = false;
+				}
 				if($save_bo_items){
 					$discount = $stotal * ($discount_perc /100);
 					$stotal -= $discount;
