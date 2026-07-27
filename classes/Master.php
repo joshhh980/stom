@@ -409,7 +409,7 @@ Class Master extends DBConnection {
 			}catch(Exception $e){
 				    $this->conn->rollback();
 				$resp['status'] = 'failed';
-			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
+			$resp['msg'] = 'An error occured. Error: '.$this->conn->error . "  " . $e->getMessage();
 
 			}
 
