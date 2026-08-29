@@ -2,6 +2,8 @@
 require './Service.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class API extends DBConnection {
 
@@ -199,4 +201,76 @@ private function parseNumeric($value)
         }
 
     }
+
+
+    public function exportProducts()
+    {
+        $conn = $this->conn;
+
+        try {
+            // Fetch items along with their supplier names (adjust table/column names if needed)
+            $query = "SELECT i.id, i.name, i.cost, i.description, s.name as supplier_name 
+                    FROM `item_list` i 
+                    LEFT JOIN `supplier_list` s ON i.supplier_id = s.id";
+            
+            $result = $conn->query($query);
+
+            if (!$result) {
+                throw new Exception("Error fetching items: " . $conn->error);
+            }
+
+            // Initialize PhpSpreadsheet
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Items List');
+
+            // Set Excel Headers
+            $headers = ['ID', 'Item Name'];
+            $columnIndex = 1;
+            foreach ($headers as $header) {
+                $sheet->setCellValueByColumnAndRow($columnIndex, 1, $header);
+                $sheet->getStyleByColumnAndRow($columnIndex, 1)->getFont()->setBold(true);
+                $columnIndex++;
+            }
+
+            // Populate Data Rows
+            $rowIndex = 2;
+            while ($row = $result->fetch_assoc()) {
+                $sheet->setCellValueByColumnAndRow(1, $rowIndex, $row['id']);
+                $sheet->setCellValueByColumnAndRow(2, $rowIndex, $row['name']);
+                $rowIndex++;
+            }
+
+            // Auto-size columns for cleaner output
+            for ($col = 1; $col <= count($headers); $col++) {
+                $sheet->getColumnDimensionByColumn($col)->setAutoSize(true);
+            }
+
+            // Clear any previous output buffers to avoid file corruption
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+
+            // Define filename
+            $filename = 'items_export_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+            // Stream file download directly to the browser
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            header('Pragma: public');
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+
+        } catch (Exception $e) {
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            var_dump("Error exporting items: " . $e->getMessage());
+        }
+    }
+
+
 }

@@ -1,8 +1,13 @@
 <div class="card card-outline card-primary">
 	<div class="card-header">
 		<h3 class="card-title">List of Item</h3>
-		<div class="card-tools">
-			<a href="javascript:void(0)" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Add New</a>
+        <div class="card-tools d-flex justify-content-between">
+			<div>
+				<a href="javascript:void(0)" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Add New</a>
+			</div>
+			<div class="ml-2">
+				<a href="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=export_products' ?>" class="btn btn-flat btn-primary">Export Products</a>
+			</div>
 		</div>
 	</div>
 	<div class="card-body">
