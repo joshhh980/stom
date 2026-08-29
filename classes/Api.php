@@ -273,4 +273,59 @@ private function parseNumeric($value)
     }
 
 
+    public function importProducts()
+    {
+        $conn = $this->conn;
+        $conn->begin_transaction();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['excel_file'])) {
+            $fileTmpPath = $_FILES['excel_file']['tmp_name'];
+
+            try {
+                $spreadsheet = IOFactory::load($fileTmpPath);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+
+                foreach ($rows as $index => $row) {
+                    if ($index === 0) continue; // Skip header row
+
+                    $itemName = trim($row[1]);
+                    $itemQty  = isset($row[2]) ? (int) $row[2] : 0; 
+                    $expiryDate = !empty($row[3]) ? date('Y-m-d', strtotime($row[3])) : null;
+
+                    // Find item by name column
+                    $stmt = $conn->prepare("SELECT id FROM `item_list` WHERE `name` = ? LIMIT 1");
+                    $stmt->bind_param("s", $itemName);
+                    $stmt->execute();
+                    $res = $stmt->get_result();
+
+                    if ($res->num_rows > 0) {
+                        $itemData = $res->fetch_assoc();
+
+                        $dbItemId = $itemData['id'];
+
+                        // Delete all existing stock rows for this item to completely wipe old inventory records
+                        $conn->query("DELETE FROM `stock_list` WHERE `item_id` = '{$dbItemId}'");
+
+                        // Insert the fresh quantity record
+                        $insertStock = $conn->prepare("INSERT INTO `stock_list` (`item_id`, `quantity`, `expiry_date`) VALUES (?, ?, ?)");
+                        $insertStock->bind_param("iis", $dbItemId, $itemQty, $expiryDate);
+                        $insertStock->execute();
+                        $insertStock->close();                
+                    }
+                    
+                    $stmt->close();
+                }
+
+                $conn->commit();
+                echo "Stock rows successfully cleared and replaced with uploaded quantities!";
+
+            } catch (Exception $e) {
+                $conn->rollback();
+                var_dump("Error importing products: " . $e->getMessage());
+            }
+        }
+    }
+
+
 }
