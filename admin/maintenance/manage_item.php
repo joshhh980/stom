@@ -21,12 +21,8 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 			<textarea name="description" id="description" cols="30" rows="2" class="form-control form no-resize"><?php echo isset($description) ? $description : ''; ?></textarea>
 		</div>
 		<div class="form-group">
-			<label for="cost" class="control-label">Selling Price</label>
+			<label for="cost" class="control-label">Cost</label>
 			<input type="number" name="cost" id="cost" step="any" class="form-control rounded-0 text-end" value="<?php echo isset($cost) ? $cost : ''; ?>">
-		</div>
-		<div class="form-group">
-			<label for="cost_price" class="control-label">Cost Price</label>
-			<input type="number" name="cost_price" id="cost_price" step="any" class="form-control rounded-0 text-end" value="<?php echo isset($cost_price) ? $cost_price : ''; ?>">
 		</div>
 		<div class="form-group">
 			<label for="supplier_id" class="control-label">Supplier</label>
