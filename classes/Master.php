@@ -614,6 +614,9 @@ switch ($action) {
 	case 'import_stock':
 		echo $api->importData();
 	break;
+	case 'export_products':
+		echo $api->exportProducts();
+	break;
 	default:
 		// echo $sysset->index();
 		break;
