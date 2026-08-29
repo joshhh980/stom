@@ -312,6 +312,20 @@ private function parseNumeric($value)
                         $insertStock->bind_param("iis", $dbItemId, $itemQty, $expiryDate);
                         $insertStock->execute();
                         $insertStock->close();                
+                    } else {
+                        // Item does not exist: Insert new item into item_list first
+                        $insertItem = $conn->prepare("INSERT INTO `item_list` (`name`) VALUES (?)");
+                        $insertItem->bind_param("s", $itemName);
+                        $insertItem->execute();
+                        
+                        $dbItemId = $conn->insert_id;
+                        $insertItem->close();
+
+                        // Insert its initial stock and expiry date
+                        $insertStock = $conn->prepare("INSERT INTO `stock_list` (`item_id`, `quantity`, `expiry_date`) VALUES (?, ?, ?)");
+                        $insertStock->bind_param("iis", $dbItemId, $itemQty, $expiryDate);
+                        $insertStock->execute();
+                        $insertStock->close();
                     }
                     
                     $stmt->close();
