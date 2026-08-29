@@ -291,7 +291,23 @@ private function parseNumeric($value)
 
                     $itemName = trim($row[1]);
                     $itemQty  = isset($row[2]) ? (int) $row[2] : 0; 
-                    $expiryDate = !empty($row[3]) ? date('Y-m-d', strtotime($row[3])) : null;
+                    $rawExpiry = isset($row[3]) ? trim($row[3]) : '';
+                    $expiryDate = null;
+
+                    if (!empty($rawExpiry)) {
+                        if (is_numeric($rawExpiry)) {
+                            $expiryDate = date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($rawExpiry));
+                        } else {
+                            $parsedDate = DateTime::createFromFormat('d-m-Y', $rawExpiry);
+                            if (!$parsedDate) $parsedDate = DateTime::createFromFormat('d/m/Y', $rawExpiry);
+                            
+                            if (!$parsedDate && strtotime($rawExpiry)) {
+                                $expiryDate = date('Y-m-d', strtotime($rawExpiry));
+                            } else if ($parsedDate) {
+                                $expiryDate = $parsedDate->format('Y-m-d');
+                            }
+                        }
+                    }
 
                     // Find item by name column
                     $stmt = $conn->prepare("SELECT id FROM `item_list` WHERE `name` = ? LIMIT 1");
