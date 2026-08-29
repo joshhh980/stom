@@ -30,17 +30,20 @@
                     <tbody>
                         <?php 
                         $i = 1;
-						$currentDate = date('Y-m-d');
-                        $qry = $conn->query("SELECT i.*,s.name as supplier FROM `item_list` i 
-						 inner join supplier_list s on i.supplier_id = s.id
-						 inner join stock_list on i.id = stock_list.item_id
-						 where stock_list.expiry_date > '{$currentDate}'
-						 GROUP BY i.id
-						 order by `name` desc");
+                        $qry = $conn->query("SELECT i.*, s.name AS supplier
+FROM item_list i
+LEFT JOIN supplier_list s
+    ON i.supplier_id = s.id
+LEFT JOIN stock_list st
+    ON i.id = st.item_id
+GROUP BY i.id;");
                         while($row = $qry->fetch_assoc()):
                             $in = $conn->query("SELECT SUM(quantity) as total FROM stock_list where item_id = '{$row['id']}' and type = 1")->fetch_array()['total'];
                             $out = $conn->query("SELECT SUM(quantity) as total FROM stock_list where item_id = '{$row['id']}' and type = 2")->fetch_array()['total'];
                             $row['available'] = $in - $out;
+if (($row['expiry_date'] ?? null) !== null && $row['expiry_date'] < $current_date){
+								continue;
+							}
                         ?>
                             <tr>
                                 <td class="text-center"><?php echo $i++; ?></td>
