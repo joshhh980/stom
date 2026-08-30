@@ -51,13 +51,7 @@ if($qry->num_rows >0){
             </div>
             <h4 class="text-info">Orders</h4>
             <table class="table table-striped table-bordered" id="list">
-                <colgroup>
-                    <col width="10%">
-                    <col width="10%">
-                    <col width="30%">
-                    <col width="25%">
-                    <col width="25%">
-                </colgroup>
+
                 <thead>
                     <tr class="text-light bg-navy">
                         <th class="text-center py-1 px-2">Qty</th>
