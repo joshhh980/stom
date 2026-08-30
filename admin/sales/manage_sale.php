@@ -44,7 +44,7 @@ if(isset($_GET['id'])){
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="date_created" class="control-label text-info">Date Created</label>
-                            <input name="date_created" id="date_created" type="date" class="form-control form-control-sm rounded-0" value="<?php echo isset($date_created) ? $date_created : '' ?>">
+                            <input name="date_created" id="date_created" type="date" class="form-control form-control-sm rounded-0" value="<?= date('Y-m-d') ?>">
                         </div>
                     </div>
                     <?php endif; ?>
@@ -63,7 +63,7 @@ if(isset($_GET['id'])){
                                     $_items_arr[$row['id']] = $row;
                                 endwhile;
                                 $currentDate = date('Y-m-d');
-                                $stock_items = $conn->query("SELECT * FROM `stock_list` where (stock_list.expiry_date > '{$currentDate}' or stock_list.expiry_date is null )");
+                                $stock_items = $conn->query("SELECT * FROM `stock_list`");
                                 while($stock_row=$stock_items->fetch_assoc()):
                                     $stock_items_arr[$stock_row['id']] = $stock_row;
                                 endwhile;
@@ -230,8 +230,8 @@ if(isset($_GET['id'])){
     </tr>
 </table>
 <script>
-    var items = $.parseJSON('<?php echo json_encode($item_arr) ?>')
-    var costs = $.parseJSON('<?php echo json_encode($cost_arr) ?>')
+    var items = <?php echo json_encode($item_arr) ?>;
+    var costs = <?php echo json_encode($cost_arr) ?>;
     
     $(function(){
         $('.select2').select2({
@@ -287,6 +287,8 @@ if(isset($_GET['id'])){
 			e.preventDefault();
             var _this = $(this)
 			 $('.err-msg').remove();
+             if ($('table#list tbody tr').length < 0) {
+ 
 			start_loader();
 			$.ajax({
 				url:_base_url_+"classes/Master.php?f=save_sale",
@@ -319,6 +321,11 @@ if(isset($_GET['id'])){
                     $('html,body').animate({scrollTop:0},'fast')
 				}
 			})
+            }else {
+                alert_toast('Add an item to save.','error');
+                                return false;
+            }
+
 		})
 
         if('<?php echo isset($id) && $id > 0 ?>' == 1){
