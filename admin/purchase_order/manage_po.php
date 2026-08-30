@@ -67,7 +67,7 @@ if(isset($_GET['id'])){
                                 $item = $conn->query("SELECT * FROM `item_list` where status = 1 order by `name` asc");
                                 while($row=$item->fetch_assoc()):
                                     $item_arr[$row['supplier_id']][$row['id']] = $row;
-                                    $cost_arr[$row['id']] = $row['cost_price'];
+                                    $cost_arr[$row['id']] = $row['cost'];
                                 endwhile;
                             ?>
                         <div class="col-md-3">
@@ -170,13 +170,13 @@ if(isset($_GET['id'])){
                             <th class="text-right py-1 px-2 sub-total">0</th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="6">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="6">Discount <input style="width:40px !important" name="discount_perc" class='' type="number" step="any" min="0" max="100" value="<?php echo isset($discount_perc) ? $discount_perc : 0 ?>">%
                                 <input type="hidden" name="discount" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 discount"><?php echo isset($discount) ? number_format($discount) : 0 ?></th>
                         </tr>
                         <tr>
-                            <th class="text-right py-1 px-2" colspan="6">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
+                            <th class="text-right py-1 px-2" colspan="6">Tax <input style="width:40px !important" name="tax_perc" class='' type="number" step="any" min="0" max="100" value="<?php echo isset($tax_perc) ? $tax_perc : 0 ?>">%
                                 <input type="hidden" name="tax" value="<?php echo isset($discount) ? $discount : 0 ?>">
                             </th>
                             <th class="text-right py-1 px-2 tax"><?php echo isset($tax) ? number_format($tax) : 0 ?></th>
@@ -232,8 +232,8 @@ if(isset($_GET['id'])){
     </tr>
 </table>
 <script>
-    var items = $.parseJSON('<?php echo json_encode($item_arr) ?>')
-    var costs = $.parseJSON('<?php echo json_encode($cost_arr) ?>')
+    var items = <?php echo json_encode($item_arr); ?>;
+    var costs = <?php echo json_encode($cost_arr) ?>;
     
     $(function(){
         $('.select2').select2({
