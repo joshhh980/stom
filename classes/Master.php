@@ -12,6 +12,26 @@ Class Master extends DBConnection {
 	public function __destruct(){
 		parent::__destruct();
 	}
+
+	private function log_action($action, $details = "") {
+		// 1. Fetch active session user profile context safely
+		$user_session_id = $this->settings->userdata('id');
+		$user_id = (!empty($user_session_id)) ? intval($user_session_id) : "NULL";
+		
+		// 2. Prepend a flag if the session is unauthenticated
+		if ($user_id === "NULL") {
+			$details = "[Unauthenticated Session] " . $details;
+		}
+
+		// 3. Escape parameters systematically to guarantee quote-safety
+		$action = $this->conn->real_escape_string($action);
+		$details = $this->conn->real_escape_string($details);
+		
+		// 4. Fire execution query
+		$sql = "INSERT INTO `audit_logs` (`user_id`, `action`, `details`) VALUES ($user_id, '{$action}', '{$details}')";
+		$this->conn->query($sql);
+	}
+
 	function capture_err(){
 		if(!$this->conn->error)
 			return false;
@@ -205,10 +225,18 @@ Class Master extends DBConnection {
 			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
 		}
 		if($resp['status'] == 'success'){
+			$current_po_code = $_POST['po_code'] ?? 'Unknown';
+			if(empty($id) && isset($po_id)) {
+				$po_query = $this->conn->query("SELECT `po_code` FROM `purchase_order_list` where id = '{$po_id}'");
+				if($po_query && $po_query->num_rows > 0) $current_po_code = $po_query->fetch_array()['po_code'];
+			}
+
 			if(empty($id)){
 				$this->settings->set_flashdata('success'," New Purchase Order was Successfully created.");
+				$this->log_action("Create Purchase Order", "Created PO Code: {$current_po_code} (ID: {$po_id})");
 			}else{
 				$this->settings->set_flashdata('success'," Purchase Order's Details Successfully updated.");
+				$this->log_action("Update Purchase Order", "Updated PO Code: {$current_po_code} (ID: {$po_id})");
 			}
 		}
 
@@ -216,6 +244,9 @@ Class Master extends DBConnection {
 	}
 	function delete_po(){
 		extract($_POST);
+		$po_code_query = $this->conn->query("SELECT `po_code` FROM `purchase_order_list` where id = '{$id}'");
+		$current_po_code = ($po_code_query && $po_code_query->num_rows > 0) ? $po_code_query->fetch_array()['po_code'] : 'Unknown';
+		
 		$bo = $this->conn->query("SELECT * FROM back_order_list where po_id = '{$id}'");
 		$del = $this->conn->query("DELETE FROM `purchase_order_list` where id = '{$id}'");
 		if($del){
@@ -234,9 +265,19 @@ Class Master extends DBConnection {
 			$this->conn->query("DELETE FROM receiving_list where (form_id='{$id}' and from_order = '1') ".(isset($r_ids) && count($r_ids) > 0 ? "OR id in (".(implode(',',$r_ids)).") OR (form_id in (".(implode(',',$bo_ids)).") and from_order = '2') " : "" )." ");
 			// echo "DELETE FROM receiving_list where (form_id='{$id}' and from_order = '1') ".(isset($r_ids) && count($r_ids) > 0 ? "OR id in (".(implode(',',$r_ids)).") OR (form_id in (".(implode(',',$bo_ids)).") and from_order = '2') " : "" )."  </br>";
 			// exit;
+			$resp['status'] = 'success';
+			$this->settings->set_flashdata('success',"po's Details Successfully deleted.");
+			
+			// ... Keep your clean up code loop here ...
+
+			// Clean, readable, and highly maintainable one-liner log execution:
+			$this->log_action("Delete Purchase Order", "Deleted PO Code: {$current_po_code} (ID: {$id}) along with associated receiving records.");
+
 		}else{
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
+
+			$this->log_action("Delete Purchase Order [FAILED]", "Attempted to delete PO Code: {$current_po_code} (ID: {$id}). Error: " . $this->conn->error);
 		}
 		return json_encode($resp);
 
@@ -416,17 +457,24 @@ Class Master extends DBConnection {
 		}
 		    $this->conn->commit();
 
+			if(empty($id)){
+				$this->log_action("Receive Stock", "Processed new inventory receiving entry (ID: {$r_id}) for PO ID: {$po_id}");
+			}else{
+				$this->log_action("Update Received Stock", "Updated details for inventory receiving entry (ID: {$r_id})");
+			}
+
 			}catch(Exception $e){
 				    $this->conn->rollback();
 				$resp['status'] = 'failed';
 			$resp['msg'] = 'An error occured. Error: '.$this->conn->error . "  " . $e->getMessage();
 
+			$this->log_action("Stock Receiving [FAILED]", "Failed processing receiving transaction for PO ID: " . ($_POST['po_id'] ?? 'Unknown'));
 			}
 
-					return json_encode($resp);
+			return json_encode($resp);
 
 		}
-	function delete_receiving(){
+		function delete_receiving(){
 		extract($_POST);
 		$qry = $this->conn->query("SELECT * from  receiving_list where id='{$id}' ");
 		if($qry->num_rows > 0){
@@ -445,9 +493,13 @@ Class Master extends DBConnection {
 					$this->conn->query("UPDATE purchase_order_list set status = 0 where id = '{$res['form_id']}' ");
 				}
 			}
+
+			$this->log_action("Delete Received Stock", "Deleted receiving record ID: {$id} and cleaned up its linked stock records.");
 		}else{
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
+
+			$this->log_action("Delete Received Stock [FAILED]", "Failed to delete receiving record ID: {$id}");
 		}
 		return json_encode($resp);
 
@@ -513,11 +565,17 @@ Class Master extends DBConnection {
 			$resp['msg'] = 'An error occured. Error: '.$this->conn->error;
 		}
 		if($resp['status'] == 'success'){
+			$current_sales_code = $_POST['sales_code'] ?? 'Unknown';
+			
 			if(empty($id)){
 				$this->settings->set_flashdata('success'," New Sales Record was Successfully created.");
+				$this->log_action("Create Sale", "Created sales record Code: {$current_sales_code} (ID: {$sale_id})");
 			}else{
 				$this->settings->set_flashdata('success'," Sales Record's Successfully updated.");
+				$this->log_action("Update Sale", "Updated sales record Code: {$current_sales_code} (ID: {$sale_id})");
 			}
+		} else {
+			$this->log_action("Save Sale [FAILED]", "Failed to save sale transaction. Input Code: " . ($_POST['sales_code'] ?? 'New'));
 		}
 
 		return json_encode($resp);
@@ -535,9 +593,13 @@ Class Master extends DBConnection {
 			if(isset($res)){
 				$this->conn->query("DELETE FROM `stock_list` where id in ({$res['stock_ids']})");
 			}
+
+			$this->log_action("Delete Sale", "Deleted sales record Code: {$current_sales_code} (ID: {$id}) and released out related stock entries.");
 		}else{
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
+
+			$this->log_action("Delete Sale [FAILED]", "Failed to delete sales record Code: {$current_sales_code} (ID: {$id})");
 		}
 		return json_encode($resp);
 
@@ -561,9 +623,13 @@ Class Master extends DBConnection {
 		if($save){
 			$resp['status'] = 'success';
 			$this->settings->set_flashdata('success',"Stock Added Successfully.");
+
+			$this->log_action("Manual Stock Entry", "Added manual stock adjustment entry. Item ID: {$item_id}, Qty: {$qty}, Batch: " . ($batch_no ?: 'None'));
 		}else{
 			$resp['status'] = 'failed';
 			$resp['error'] = $this->conn->error;
+
+			$this->log_action("Manual Stock Entry [FAILED]", "Failed to manually adjust stock level for Item ID: {$item_id}");
 		}
 				return json_encode($resp);
 
