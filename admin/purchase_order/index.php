@@ -6,6 +6,8 @@
 			<a href="<?php echo 'http://localhost/sms/' ?>admin/?page=purchase_order/manage_po" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
 
         </div>
+                            <?php if($_settings->userdata('type') == 1): ?>
+
 <div class="position-relative d-inline-block ml-2">
     <form action="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=import_stock&receive=true' ?>" method="POST" enctype="multipart/form-data">
         <input 
@@ -20,6 +22,7 @@
         <button class="btn btn-flat btn-primary position-relative" type="submit">Upload</button>
     </form>
 </div>
+<?php endif; ?>
         </div>
 	</div>
 	<div class="card-body">
