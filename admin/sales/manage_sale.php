@@ -123,6 +123,12 @@ if(isset($_GET['id'])){
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
+                                <label for="price" class="control-label">Price</label>
+                                <input type="number" class="form-control rounded-0" id="price">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
                                 <label for="qty" class="control-label">Qty</label>
                                 <input type="number" step="any" class="form-control rounded-0" id="qty">
                             </div>
@@ -244,12 +250,17 @@ if(isset($_GET['id'])){
             var item = itemEl.val()
             var stock = $(`#${item}`).val()            
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
+            var price = $('#price').val() > 0 ? $('#price').val() : 0;
             if(qty > stock){
                 alert_toast('Item quantity exceedes stock.','error');
                 return;
             }
-            var price = costs[item] || 0
-            var total = parseFloat(qty) *parseFloat(price)
+            const costPrice = costs[item] || 0
+            if(price < costPrice){
+                alert_toast('Item price is less than cost price.','error');
+                return;
+            }
+            var total = parseFloat(qty) * parseFloat(price)
             // console.log(supplier,item)
             var item_name = items[item].name || 'N/A';
             var item_description = items[item].description || 'N/A';
@@ -288,7 +299,7 @@ if(isset($_GET['id'])){
 			e.preventDefault();
             var _this = $(this)
 			 $('.err-msg').remove();
-             if ($('table#list tbody tr').length < 0) {
+             if ($('table#list tbody tr').length > 0) {
  
 			start_loader();
 			$.ajax({
