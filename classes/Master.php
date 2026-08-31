@@ -608,8 +608,6 @@ Class Master extends DBConnection {
 	function save_stock(){
 		$item_id = $_POST['item_id'];
 		$qty = $_POST['quantity'];
-		$price = $_POST['price'];
-		$total = $_POST['total'];
 		$expiry_date = $_POST['expiry_date'];
 		$batch_no = $_POST['batch_no'];
 
