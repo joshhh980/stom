@@ -251,10 +251,10 @@ if(isset($_GET['id'])){
             var stock = $(`#${item}`).val()            
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
             var price = $('#price').val() > 0 ? $('#price').val() : 0;
-            if(qty > stock){
-                alert_toast('Item quantity exceedes stock.','error');
-                return;
-            }
+            //if(qty > stock){
+            //    alert_toast('Item quantity exceedes stock.','error');
+            //    return;
+            //}
             const costPrice = costs[item] || 0
             //if(price < costPrice){
             //    alert_toast('Item price is less than cost price.','error');
