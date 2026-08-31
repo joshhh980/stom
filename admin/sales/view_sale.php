@@ -6,112 +6,56 @@ if ($qry->num_rows > 0) {
     }
 }
 ?>
+<!-- Hidden container holding your data elements safely -->
 <div class="d-none">
-    <div class="p-2" id="print_out">
-        <style>
-            @media print {
-    @page {
-        /* Set all margins to zero to stop the printer from centering */
-        margin: 0;
-    }
-
-    body {
-        /* Control the actual receipt width here instead of in @page */
-        width: 80mm; 
-        margin: 2px 2px 80px 2px;
-        font-family: 'Courier New', Courier !important;
-    }
-
-    .table-font {
-        font-size: 40px;
-    }
-
-    .table-bordered-4 {
-        border-style: dashed;
-        width: 100%; /* Force the table to use the 80mm body width */
-    }
-
-    .table-bordered-4 td,
-    .table-bordered-4 th {
-        border-color: black !important;
-    }
-}
-        </style>
-        <div class="container-fluid">
-
-
-            <div class="row">
-                <div class="col-6">
-                    <label class="control-label text-info table-font">Sales Code</label>
-                    <div class="table-font"><?php echo isset($sales_code) ? $sales_code : '' ?></div>
-                </div>
-                <div class="col-6">
-                    <div class="form-group">
-                        <label for="client" class="control-label text-info table-font">Client Name</label>
-                        <div class="table-font"><?php echo isset($client) ? $client : '' ?></div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="form-group">
-                        <label class="control-label text-info table-font">Date</label>
-                        <div class="table-font"><?php echo isset($date_created) ? $date_created : '' ?></div>
-                    </div>
-                </div>
-            </div>
-            <br />
-            <br />
-            <h4 class="text-info font-weight-bold table-font">Items</h4>
-            <table class="table" id="list">
-                <thead>
-                    <tr class="text-light bg-navy">
-                        <th class=" table-font">Item</th>
-                        <th class=" table-font">Qty</th>
-                        <th class=" table-font">Cost</th>
-                        <th class=" table-font">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $total = 0;
-                    $qry = $conn->query("SELECT s.*,i.name,i.description FROM `stock_list` s inner join item_list i on s.item_id = i.id where s.id in ({$stock_ids})");
-                    while ($row = $qry->fetch_assoc()):
-                        $total += $row['total']
-                    ?>
-                        <tr>
-                            <td class=" table-font">
-                                <?php echo $row['name'] ?>
-                            </td>
-                            <td class=" table-font"> <?php echo number_format($row['quantity']) ?></td>
-                            <td class=" table-font"><?php echo number_format($row['price'], 2) ?></td>
-                            <td class=" table-font"><?php echo number_format($row['total'], 2) ?></td>
-                        </tr>
-
-                    <?php endwhile; ?>
-
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th class="table-font" colspan="3">Total</th>
-                        <th class=" grand-total table-font"><?php echo isset($amount) ? number_format($amount, 2) : 0 ?></th>
-                    </tr>
-                </tfoot>
-            </table>
-            <br />
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <?php if ($remarks != "") : ?>
-                            <label for="remarks" class="text-info control-label table-font">Remarks</label>
-                            <p class="table-font"><?php echo isset($remarks) ? $remarks : '' ?></p>
-                        <?php else: ?>
-                            <label for="remarks" class="text-info control-label table-font">&nbsp;</label>
-                        <?php endif ?>
-                    </div>
-                </div>
-            </div>
+    <div id="print_out">
+        <div class="meta-section">
+            <div style="margin-bottom: 4px;"><span class="bold">Sales Code:</span> <?php echo isset($sales_code) ? $sales_code : '' ?></div>
+            <div style="margin-bottom: 4px;"><span class="bold">Client Name:</span> <?php echo isset($client) ? $client : 'Guest' ?></div>
+            <div style="margin-bottom: 4px;"><span class="bold">Date:</span> <?php echo isset($date_created) ? $date_created : '' ?></div>
         </div>
+        <h4 class="receipt-heading">Items</h4>
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th align="left">Item</th>
+                    <th align="center" style="width: 40px;">Qty</th>
+                    <th align="right">Cost</th>
+                    <th align="right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $total = 0;
+                $qry = $conn->query("SELECT s.*,i.name,i.description FROM `stock_list` s inner join item_list i on s.item_id = i.id where s.id in ({$stock_ids})");
+                while ($row = $qry->fetch_assoc()):
+                    $total += $row['total']
+                ?>
+                    <tr>
+                        <td align="left"><?php echo $row['name'] ?></td>
+                        <td align="center"><?php echo number_format($row['quantity']) ?></td>
+                        <td align="right"><?php echo number_format($row['price'], 2) ?></td>
+                        <td align="right"><?php echo number_format($row['total'], 2) ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3" align="left">Total</th>
+                    <th align="right" class="grand-total-val"><?php echo isset($amount) ? number_format($amount, 2) : 0 ?></th>
+                </tr>
+            </footer>
+        </table>
+        <?php if (!empty($remarks)) : ?>
+            <div style="margin-top: 10px; font-size: 22px;">
+                <span class="bold">Remarks:</span>
+                <p style="margin: 2px 0 0 0;"><?php echo $remarks ?></p>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
+
+<!-- On-Screen Admin Dashboard Card View Layout (Standard Styles Retained) -->
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h4 class="card-title">Sales Record - <?php echo $sales_code ?></h4>
@@ -134,10 +78,9 @@ if ($qry->num_rows > 0) {
             <table class="table table-striped table-bordered" id="list">
                 <colgroup>
                     <col width="10%">
-                    <col width="10%">
-                    <col width="30%">
-                    <col width="25%">
-                    <col width="25%">
+                    <col width="50%">
+                    <col width="20%">
+                    <col width="20%">
                 </colgroup>
                 <thead>
                     <tr class="text-light bg-navy">
@@ -149,10 +92,9 @@ if ($qry->num_rows > 0) {
                 </thead>
                 <tbody>
                     <?php
-                    $total = 0;
-                    $qry = $conn->query("SELECT s.*,i.name,i.description FROM `stock_list` s inner join item_list i on s.item_id = i.id where s.id in ({$stock_ids})");
+                    // Reset query resource index back to first element row for secondary on-screen render loops
+                    $qry->data_seek(0);
                     while ($row = $qry->fetch_assoc()):
-                        $total += $row['total']
                     ?>
                         <tr>
                             <td class="py-1 px-2 text-center"><?php echo number_format($row['quantity']) ?></td>
@@ -163,9 +105,7 @@ if ($qry->num_rows > 0) {
                             <td class="py-1 px-2 text-right"><?php echo number_format($row['price'], 2) ?></td>
                             <td class="py-1 px-2 text-right"><?php echo number_format($row['total'], 2) ?></td>
                         </tr>
-
                     <?php endwhile; ?>
-
                 </tbody>
                 <tfoot>
                     <tr>
@@ -174,74 +114,79 @@ if ($qry->num_rows > 0) {
                     </tr>
                 </tfoot>
             </table>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="remarks" class="text-info control-label">Remarks</label>
-                        <p><?php echo isset($remarks) ? $remarks : '' ?></p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     <div class="card-footer py-1 text-center">
-        <button class="btn btn-flat btn-success" type="button" id="print">Print</button>
+        <button class="btn btn-flat btn-success" type="button" id="print-pos-receipt">Print POS Receipt</button>
         <a class="btn btn-flat btn-primary" href="<?php echo base_url . '/admin?page=sales/manage_sale&id=' . (isset($id) ? $id : '') ?>">Edit</a>
         <a class="btn btn-flat btn-dark" href="<?php echo base_url . '/admin?page=sales' ?>">Back To List</a>
     </div>
 </div>
-<table id="clone_list" class="d-none">
-    <tr>
-        <td class="py-1 px-2 text-center">
-            <button class="btn btn-outline-danger btn-sm rem_row" type="button"><i class="fa fa-times"></i></button>
-        </td>
-        <td class="py-1 px-2 text-center qty">
-            <span class="visible"></span>
-            <input type="hidden" name="item_id[]">
-            <input type="hidden" name="qty[]">
-            <input type="hidden" name="price[]">
-            <input type="hidden" name="total[]">
-        </td>
-        <td class="py-1 px-2 item">
-        </td>
-        <td class="py-1 px-2 text-right cost">
-        </td>
-        <td class="py-1 px-2 text-right total">
-        </td>
-    </tr>
-</table>
 <script>
     $(function() {
-        $('#print').click(function() {
-            start_loader()
-            var _el = $('<div>')
-            var _head = $('head').clone()
-            _head.find('title').text("Sales Record - Print View")
-            var p = $('#print_out').clone()
-            p.find('tr.text-light').removeClass("text-light bg-navy")
-            _el.append(_head)
-            _el.append('<div class="">' +
-                '<div class="text-right">' +
-                '<img src="<?php echo validate_image($_settings->info('logo')) ?>" width="265px" height="265px" />' +
-                '</div>' +
-                '<div class="font-weight-bold">' +
-                '<h4 class="font-weight-bolder"  style="font-size: 70px;"><?php echo $_settings->info('name') ?></h4>' +
-                '<h4 class="font-weight-bold table-font">Sales Record</h4>' +
-                '</div>' +
-                '<div class="col-1 text-right">' +
-                '</div>' +
-                '</div><hr/>')
-            _el.append(p.html())
-            var nw = window.open("", "", "width=800px,height=900,left=250,location=no,titlebar=yes")
-            nw.document.write(_el.html())
-            nw.document.close()
+        $('#print-pos-receipt').click(function(e) {
+            e.preventDefault();
+            
+            // Clone the bare data from the hidden container div
+            var printContents = $('#print_out').clone();
+            
+            // Reconstruct a pristine standalone context completely isolated from framework styles
+            var thermalHTML = '<!DOCTYPE html><html><head>';
+            thermalHTML += '<title></title>'; // Explicitly empty title prevents browser headers/footers
+            thermalHTML += '<style>';
+            thermalHTML += '@media print {';
+            thermalHTML += '  @page { margin: 0 !important; size: 80mm auto !important; }'; // Auto height cuts right where content ends
+            thermalHTML += '  html, body { margin: 0 !important; padding: 0 !important; width: 80mm !important; max-width: 80mm !important; height: auto !important; font-family: "Courier New", Courier, monospace !important; background: #fff; color: #000; }';
+            
+            // ─── THE CORRECTION: SHIFT THE BOUNDARIES INWARD FROM 80MM TO 72MM ───
+            thermalHTML += '  .receipt-container { width: 80mm; padding: 0 4mm !important; box-sizing: border-box; margin: 0; }';
+            
+            thermalHTML += '  .store-title { font-size: 18px !important; font-weight: 900; text-align: center; margin: 2px 0; text-transform: uppercase; }';
+            thermalHTML += '  .receipt-heading { font-size: 15px !important; font-weight: bold; border-bottom: 1px dashed #000; margin: 8px 0 4px 0; padding-bottom: 2px; text-transform: uppercase; }';
+            thermalHTML += '  .meta-section { font-size: 13px !important; line-height: 1.3; }';
+            thermalHTML += '  .bold { font-weight: bold !important; }';
+            thermalHTML += '  .divider { border-top: 1px dashed #000 !important; margin: 5px 0; width: 100%; }';
+            thermalHTML += '  .receipt-table { width: 100% !important; border-collapse: collapse !important; margin-top: 5px; table-layout: fixed; }';
+            thermalHTML += '  .receipt-table th, .receipt-table td { font-size: 13px !important; line-height: 1.3; padding: 4px 2px !important; font-family: "Courier New", Courier, monospace !important; word-wrap: break-word; }';
+            thermalHTML += '  .receipt-table tbody tr { border-bottom: 1px dashed #000; }';
+            thermalHTML += '  .receipt-table tfoot tr th { font-size: 14px !important; font-weight: bold; padding-top: 6px !important; border-top: 1px solid #000; }';
+            thermalHTML += '}';
+            thermalHTML += '</style></head><body>';
+            
+            // Structured top branding area formatted specifically for the 80mm canvas
+            thermalHTML += '<div class="receipt-container">';
+            thermalHTML += '  <h4 class="store-title"><?php echo $_settings->info("name") ?></h4>';
+            thermalHTML += '  <div style="font-size: 14px; font-weight: bold; text-align: center; margin-bottom: 4px;">SALES RECEIPT</div>';
+            thermalHTML += '  <div class="divider"></div>';
+            
+            // Append data payload body elements smoothly
+            thermalHTML += '  <div class="meta-section">' + printContents.find('.meta-section').html() + '</div>';
+            thermalHTML += '  <h4 class="receipt-heading">Items</h4>';
+            thermalHTML += '  <table class="receipt-table">' + printContents.find('.receipt-table').html() + '</table>';
+            
+            // Check and clean rendering block paths for conditional remarks
+            if(printContents.find('.bold:contains("Remarks:")').length > 0) {
+                thermalHTML += '  <div class="divider"></div>';
+                thermalHTML += '  <div class="meta-section">' + printContents.find('.bold:contains("Remarks:")').parent().html() + '</div>';
+            }
+            
+            thermalHTML += '  <div class="divider"></div>';
+            thermalHTML += '  <div style="font-size: 13px; font-weight: bold; text-align: center; margin-top: 12px;">THANK YOU FOR YOUR BUSINESS!</div>';
+            thermalHTML += '</div>';
+            thermalHTML += '</body></html>';
+            
+            // Open window runtime target reference without location context tags
+            var nw = window.open("", "", "width=800,height=900,left=250,location=no,titlebar=no,menubar=no");
+            nw.document.write(thermalHTML);
+            nw.document.close();
+            
+            // Timeout delay structures guarantee asset parsing processes completely before calling print
             setTimeout(() => {
-                nw.print()
+                nw.print();
                 setTimeout(() => {
-                    nw.close()
-                    end_loader()
-                }, 200);
+                    nw.close();
+                }, 150);
             }, 500);
-        })
-    })
+        });
+    });
 </script>
