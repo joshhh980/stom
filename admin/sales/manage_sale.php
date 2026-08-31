@@ -64,6 +64,7 @@ if(isset($_GET['id'])){
                                 endwhile;
                                 $currentDate = date('Y-m-d');
                                 $stock_items = $conn->query("SELECT * FROM `stock_list`");
+                                $stock_items_arr = [];
                                 while($stock_row=$stock_items->fetch_assoc()):
                                     $stock_items_arr[$stock_row['id']] = $stock_row;
                                 endwhile;
