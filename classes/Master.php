@@ -552,7 +552,7 @@ Class Master extends DBConnection {
 				}
 			}
 			foreach($item_id as $k =>$v){
-				$sql = "INSERT INTO `stock_list` set item_id='{$v}', `quantity` = '{$qty[$k]}', `unit` = '{$unit[$k]}', `price` = '{$price[$k]}', `total` = '{$total[$k]}', `type` = 2 ";
+				$sql = "INSERT INTO `stock_list` set item_id='{$v}', `quantity` = '{$qty[$k]}', `price` = '{$price[$k]}', `total` = '{$total[$k]}', `type` = 2 ";
 				$save = $this->conn->query($sql);
 				if($save){
 					$sids[] = $this->conn->insert_id;
