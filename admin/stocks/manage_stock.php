@@ -85,8 +85,8 @@ if(isset($_GET['id'])){
     </div>
 </div>
 <script>
-    var items = $.parseJSON('<?php echo json_encode($item_arr) ?>')
-    var costs = $.parseJSON('<?php echo json_encode($cost_arr) ?>')
+    var items = <?php echo json_encode($item_arr, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    var costs = <?php echo json_encode($cost_arr) ?>;
     
     $(function(){
         $('.select2').select2({
