@@ -256,10 +256,10 @@ if(isset($_GET['id'])){
                 return;
             }
             const costPrice = costs[item] || 0
-            if(price < costPrice){
-                alert_toast('Item price is less than cost price.','error');
-                return;
-            }
+            //if(price < costPrice){
+            //    alert_toast('Item price is less than cost price.','error');
+            //    return;
+            //}
             var total = parseFloat(qty) * parseFloat(price)
             // console.log(supplier,item)
             var item_name = items[item].name || 'N/A';
