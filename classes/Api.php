@@ -282,34 +282,57 @@ private function parseNumeric($value)
             $fileTmpPath = $_FILES['excel_file']['tmp_name'];
 
             try {
-                $spreadsheet = IOFactory::load($fileTmpPath);
+                // 1. Target the file reader directly
+                $reader = IOFactory::createReaderForFile($fileTmpPath);
+
+                // 2. Strip visual parsing allocations immediately 
+                $reader->setReadDataOnly(true); 
+                $reader->setReadEmptyCells(false);
+
+                // 3. Instantiate the file layout
+                $spreadsheet = $reader->load($fileTmpPath);
                 $worksheet = $spreadsheet->getActiveSheet();
-                $rows = $worksheet->toArray();
 
-                foreach ($rows as $index => $row) {
-                    if ($index === 0) continue; // Skip header row
+                // ─── THE RAM SAVER: CONVERT THE EXACT DATA BOX DIRECTLY TO AN ARRAY ───
+                // This targets column A through E. It extracts exactly up to row 300 
+                // to cleanly bypass any accidental 1,000,000 row Excel bloat.
+                $rows = $worksheet->rangeToArray('A1:E300', null, true, true, false);
 
-                    $itemName = trim($row[1]);
-                    $itemQty  = isset($row[2]) ? (int) $row[2] : 0; 
-                    $rawExpiry = isset($row[3]) ? trim($row[3]) : '';
-                    $expiryDate = null;
+                foreach ($rows as $rowIndex => $rowData) {
+                    // Skip the index header tracking row
+                    if ($rowIndex === 0 || empty($rowData[1])) {
+                        continue; 
+                    }
 
+                    // Map columns safely to match your exact file properties
+                    $itemName    = isset($rowData[1]) ? trim($rowData[1]) : ''; // Col B
+                    $itemQty     = isset($rowData[2]) ? (int) $rowData[2] : 0;  // Col C
+                    $rawExpiry   = isset($rowData[3]) ? trim($rowData[3]) : '';  // Col D
+                    $replaceName = isset($rowData[4]) ? trim($rowData[4]) : '';  // Col E
+                    $expiryDate  = null;
+
+                    // --- EXPIRY DATE PARSING ---
                     if (!empty($rawExpiry)) {
                         if (is_numeric($rawExpiry)) {
                             $expiryDate = date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($rawExpiry));
                         } else {
-                            $parsedDate = DateTime::createFromFormat('d-m-Y', $rawExpiry);
-                            if (!$parsedDate) $parsedDate = DateTime::createFromFormat('d/m/Y', $rawExpiry);
+                            // Normalize forward slashes out to match DateTime object constraints
+                            $rawExpiryCleaned = str_replace('/', '-', $rawExpiry);
                             
-                            if (!$parsedDate && strtotime($rawExpiry)) {
-                                $expiryDate = date('Y-m-d', strtotime($rawExpiry));
-                            } else if ($parsedDate) {
+                            $parsedDate = DateTime::createFromFormat('d-m-Y', $rawExpiryCleaned);
+                            if (!$parsedDate) $parsedDate = DateTime::createFromFormat('j-n-y', $rawExpiryCleaned);
+                            if (!$parsedDate) $parsedDate = DateTime::createFromFormat('d-m-y', $rawExpiryCleaned);
+                            if (!$parsedDate) $parsedDate = DateTime::createFromFormat('Y-m-d', $rawExpiryCleaned);
+                            
+                            if ($parsedDate) {
                                 $expiryDate = $parsedDate->format('Y-m-d');
+                            } else if (strtotime($rawExpiryCleaned)) {
+                                $expiryDate = date('Y-m-d', strtotime($rawExpiryCleaned));
                             }
                         }
                     }
 
-                    // Find item by name column
+                    // --- DATABASE PROCESSING ---
                     $stmt = $conn->prepare("SELECT id FROM `item_list` WHERE `name` = ? LIMIT 1");
                     $stmt->bind_param("s", $itemName);
                     $stmt->execute();
@@ -317,27 +340,24 @@ private function parseNumeric($value)
 
                     if ($res->num_rows > 0) {
                         $itemData = $res->fetch_assoc();
-
                         $dbItemId = $itemData['id'];
 
-                        // Delete all existing stock rows for this item to completely wipe old inventory records
                         $conn->query("DELETE FROM `stock_list` WHERE `item_id` = '{$dbItemId}'");
 
-                        // Insert the fresh quantity record
                         $insertStock = $conn->prepare("INSERT INTO `stock_list` (`item_id`, `quantity`, `expiry_date`) VALUES (?, ?, ?)");
                         $insertStock->bind_param("iis", $dbItemId, $itemQty, $expiryDate);
                         $insertStock->execute();
                         $insertStock->close();                
                     } else {
-                        // Item does not exist: Insert new item into item_list first
-                        $insertItem = $conn->prepare("INSERT INTO `item_list` (`name`) VALUES (?)");
-                        $insertItem->bind_param("s", $itemName);
+                        $supplierId = 10; 
+
+                        $insertItem = $conn->prepare("INSERT INTO `item_list` (`name`, `supplier_id`) VALUES (?, ?)");
+                        $insertItem->bind_param("si", $itemName, $supplierId);
                         $insertItem->execute();
                         
                         $dbItemId = $conn->insert_id;
                         $insertItem->close();
 
-                        // Insert its initial stock and expiry date
                         $insertStock = $conn->prepare("INSERT INTO `stock_list` (`item_id`, `quantity`, `expiry_date`) VALUES (?, ?, ?)");
                         $insertStock->bind_param("iis", $dbItemId, $itemQty, $expiryDate);
                         $insertStock->execute();
@@ -345,7 +365,23 @@ private function parseNumeric($value)
                     }
                     
                     $stmt->close();
+
+                    // --- UPDATE REPLACE NAME AND STATUS ---
+                    if (!empty($replaceName)) {
+                        $updateItemStmt = $conn->prepare("UPDATE `item_list` SET `name` = ?, `status` = 1 WHERE `id` = ?");
+                        $updateItemStmt->bind_param("si", $replaceName, $dbItemId);
+                    } else {
+                        $updateItemStmt = $conn->prepare("UPDATE `item_list` SET `status` = 1 WHERE `id` = ?");
+                        $updateItemStmt->bind_param("i", $dbItemId);
+                    }
+                    
+                    $updateItemStmt->execute();
+                    $updateItemStmt->close();
                 }
+
+                // Explicit clean teardown
+                $spreadsheet->disconnectWorksheets();
+                unset($spreadsheet);
 
                 $conn->commit();
                 echo "Stock rows successfully cleared and replaced with uploaded quantities!";
@@ -356,6 +392,8 @@ private function parseNumeric($value)
             }
         }
     }
+
+
 
 
 }
