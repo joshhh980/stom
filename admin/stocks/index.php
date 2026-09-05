@@ -3,7 +3,7 @@
 		<h3 class="card-title">List of Stocks</h3>
         <?php if($_settings->userdata('type') == 1): ?>
 			<div class="card-tools">
-				<a href="<?php echo base_url ?>admin/?page=stocks/manage_stock" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Create New</a>
+				<a href="<?php echo base_url ?>admin/?page=stocks/manage_stock" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Add to Stock</a>
 			</div>
 			<div class="position-relative d-inline-block ml-2">
 				<form action="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=import_products' ?>" method="POST" enctype="multipart/form-data">
