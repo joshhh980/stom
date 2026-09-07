@@ -57,10 +57,17 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 
 		$('#selling_price').blur(function(){
 			var sp = parseFloat($(this).val());
-			if(!isNaN(sp) && sp > 0){
-				var profit_margin_percent = 20;
+			
+			// Get the percentage value, or default to 50 if the field is empty/invalid
+			var percentInput = $('#profit_margin_percent').val();
+			var profit_margin_percent = percentInput ? parseFloat(percentInput) : 50;
+
+			// Run the calculation if selling price is valid and percentage won't cause division by zero
+			if(!isNaN(sp) && sp > 0 && !isNaN(profit_margin_percent) && profit_margin_percent > -100){
 				var cost = sp / (1 + (profit_margin_percent / 100));
 				$('#cost').val(cost.toFixed(2));
+			} else {
+				$('#cost').val('');
 			}
 		});
 

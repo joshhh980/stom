@@ -231,21 +231,20 @@ static function save_receiving($conn, $params)
 			
 	}
 }
-static function update_item_cost_from_sales($conn, $percent = 20)
+static function update_item_cost_from_sales($conn, $percent = 50)
 {
-    $resp = ['status' => 'success', 'updated' => 0, 'skipped' => 0, 'errors' => []];
+    $resp = ['status' => 'success', 'updated' => 0, 'errors' => []];
 
-    // Sale line items are stored in stock_list with type = 2 (outgoing/sale).
-    // Get the most recent sale price per item_id.
-    $sql = "SELECT s1.item_id, s1.price
-            FROM `stock_list` s1
-            INNER JOIN (
-                SELECT item_id, MAX(id) AS max_id
-                FROM `stock_list`
-                WHERE `type` = 2
-                GROUP BY item_id
-            ) s2 ON s1.item_id = s2.item_id AND s1.id = s2.max_id
-            WHERE s1.type = 2";
+    // Only pull stock_list rows that are BOTH:
+    //  - tagged as a sale (type = 2), AND
+    //  - explicitly referenced by a sales_list.stock_ids entry
+    // Ordered newest-first so we can take the latest price per item.
+    $sql = "SELECT st.item_id, st.price
+            FROM `sales_list` sl
+            INNER JOIN `stock_list` st
+                ON FIND_IN_SET(st.id, sl.stock_ids)
+                AND st.type = 2
+            ORDER BY st.id DESC";
 
     $result = $conn->query($sql);
 
@@ -255,23 +254,20 @@ static function update_item_cost_from_sales($conn, $percent = 20)
         return $resp;
     }
 
+    $seen = [];
+
     while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
         $item_id = (int) $row['item_id'];
         $price   = (float) $row['price'];
 
+        // Results are newest-first, so the first time we see an item_id
+        // is its most recent sale price. Skip any repeats.
+        if (isset($seen[$item_id])) {
+            continue;
+        }
+        $seen[$item_id] = true;
+
         if ($price <= 0) {
-            continue;
-        }
-
-        $item_row = $conn->query("SELECT `cost` FROM `item_list` WHERE `id` = '{$item_id}'")->fetch_array(MYSQLI_ASSOC);
-
-        if (!$item_row) {
-            $resp['skipped']++;
-            continue;
-        }
-
-        if (!empty($item_row['cost']) && (float) $item_row['cost'] > 0) {
-            $resp['skipped']++;
             continue;
         }
 
