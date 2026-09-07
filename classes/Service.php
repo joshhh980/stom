@@ -231,4 +231,72 @@ static function save_receiving($conn, $params)
 			
 	}
 }
+static function update_item_cost_from_sales($conn, $percent = 20)
+{
+    $resp = ['status' => 'success', 'updated' => 0, 'skipped' => 0, 'errors' => []];
+
+    // Sale line items are stored in stock_list with type = 2 (outgoing/sale).
+    // Get the most recent sale price per item_id.
+    $sql = "SELECT s1.item_id, s1.price
+            FROM `stock_list` s1
+            INNER JOIN (
+                SELECT item_id, MAX(id) AS max_id
+                FROM `stock_list`
+                WHERE `type` = 2
+                GROUP BY item_id
+            ) s2 ON s1.item_id = s2.item_id AND s1.id = s2.max_id
+            WHERE s1.type = 2";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        $resp['status'] = 'failed';
+        $resp['msg'] = 'Failed to fetch sale prices. Error: ' . $conn->error;
+        return $resp;
+    }
+
+    while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+        $item_id = (int) $row['item_id'];
+        $price   = (float) $row['price'];
+
+        if ($price <= 0) {
+            continue;
+        }
+
+        $item_row = $conn->query("SELECT `cost` FROM `item_list` WHERE `id` = '{$item_id}'")->fetch_array(MYSQLI_ASSOC);
+
+        if (!$item_row) {
+            $resp['skipped']++;
+            continue;
+        }
+
+        if (!empty($item_row['cost']) && (float) $item_row['cost'] > 0) {
+            $resp['skipped']++;
+            continue;
+        }
+
+        // Matches frontend: cost = sp / (1 + profit_margin_percent / 100)
+        $cost = $price / (1 + ($percent / 100));
+        $cost = round($cost, 2);
+
+        $update_sql = "UPDATE `item_list` SET `cost` = '{$cost}' WHERE `id` = '{$item_id}'";
+        $update = $conn->query($update_sql);
+
+        if ($update) {
+            $resp['updated']++;
+        } else {
+            $resp['errors'][] = [
+                'item_id' => $item_id,
+                'msg' => $conn->error,
+                'sql' => $update_sql
+            ];
+        }
+    }
+
+    if (!empty($resp['errors'])) {
+        $resp['status'] = 'partial';
+    }
+
+    return $resp;
+}
 }

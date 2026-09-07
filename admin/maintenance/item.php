@@ -8,6 +8,11 @@
 			<div class="ml-2">
 				<a href="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=export_products' ?>" class="btn btn-flat btn-primary">Export Products</a>
 			</div>
+			<div class="position-relative d-inline-block ml-2">
+				<form action="<?php echo 'http://localhost/sms/' . 'classes/Master.php?f=update_item_costs' ?>" method="POST" enctype="multipart/form-data">
+					<button class="btn btn-flat btn-primary position-relative" type="submit">Update Item Costs</button>
+				</form>
+			</div>
 		</div>
 	</div>
 	<div class="card-body">

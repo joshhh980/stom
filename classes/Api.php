@@ -393,6 +393,28 @@ private function parseNumeric($value)
         }
     }
 
+    public function updateItemCosts()
+    {
+        $conn = $this->conn;
+        $conn->begin_transaction();
+
+        try {
+            $percent = isset($_GET['percent']) ? (float) $_GET['percent'] : 20;
+
+            $resp = Service::update_item_cost_from_sales($conn, $percent);
+
+            if ($resp['status'] === 'failed') {
+                throw new Exception($resp['msg']);
+            }
+
+            $conn->commit();
+            echo json_encode($resp);
+
+        } catch (Exception $e) {
+            $conn->rollback();
+            var_dump("Error updating item costs: " . $e->getMessage());
+        }
+    }
 
 
 

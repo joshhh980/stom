@@ -19,6 +19,10 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 		<div class="form-group">
 			<label for="description" class="control-label">Description</label>
 			<textarea name="description" id="description" cols="30" rows="2" class="form-control form no-resize"><?php echo isset($description) ? $description : ''; ?></textarea>
+		</div>		
+		<div class="form-group">
+			<label for="selling_price" class="control-label">Selling Price</label>
+			<input type="number" id="selling_price" step="any" class="form-control rounded-0 text-end" value="">
 		</div>
 		<div class="form-group">
 			<label for="cost" class="control-label">Cost</label>
@@ -48,17 +52,29 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 	</form>
 </div>
 <script>
-  
 	$(document).ready(function(){
         $('.select2').select2({placeholder:"Please Select here",width:"relative"})
+
+		$('#selling_price').blur(function(){
+			var sp = parseFloat($(this).val());
+			if(!isNaN(sp) && sp > 0){
+				var profit_margin_percent = 20;
+				var cost = sp / (1 + (profit_margin_percent / 100));
+				$('#cost').val(cost.toFixed(2));
+			}
+		});
+
 		$('#item-form').submit(function(e){
 			e.preventDefault();
             var _this = $(this)
 			 $('.err-msg').remove();
 			start_loader();
+
+			var formData = new FormData($(this)[0]);
+
 			$.ajax({
 				url:_base_url_+"classes/Master.php?f=save_item",
-				data: new FormData($(this)[0]),
+				data: formData,
                 cache: false,
                 contentType: false,
                 processData: false,

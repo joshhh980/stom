@@ -684,6 +684,9 @@ switch ($action) {
 	case 'import_products':
 		echo $api->importProducts();
 	break;
+	case 'update_item_costs':
+		echo $api->updateItemCosts();
+	break;
 	default:
 		// echo $sysset->index();
 		break;
