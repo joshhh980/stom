@@ -17,8 +17,7 @@
 				<colgroup>
 					<col width="5%">
 					<col width="15%">
-					<col width="25%">
-					<col width="20%">
+					<col width="45%">
 					<col width="15%">
 					<col width="20%">
 				</colgroup>
@@ -27,7 +26,6 @@
 						<th>#</th>
 						<th>Date Created</th>
 						<th>Name</th>
-						<th>Supplier</th>
 						<th>Status</th>
 						<th>Action</th>
 					</tr>
@@ -35,14 +33,13 @@
 				<tbody>
 					<?php 
 					$i = 1;
-						$qry = $conn->query("SELECT i.*,s.name as supplier from `item_list` i inner join supplier_list s on i.supplier_id = s.id order by i.name asc,s.name asc ");
+						$qry = $conn->query("SELECT i.* from `item_list` i order by i.name asc ");
 						while($row = $qry->fetch_assoc()):
 					?>
 						<tr>
 							<td class="text-center"><?php echo $i++; ?></td>
 							<td><?php echo date("Y-m-d H:i",strtotime($row['date_created'])) ?></td>
 							<td><?php echo $row['name'] ?></td>
-							<td><?php echo $row['supplier'] ?></td>
 							<td class="text-center">
                                 <?php if($row['status'] == 1): ?>
                                     <span class="badge badge-success rounded-pill">Active</span>

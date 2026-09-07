@@ -25,18 +25,6 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 			<input type="number" name="cost" id="cost" step="any" class="form-control rounded-0 text-end" value="<?php echo isset($cost) ? $cost : ''; ?>">
 		</div>
 		<div class="form-group">
-			<label for="supplier_id" class="control-label">Supplier</label>
-			<select name="supplier_id" id="supplier_id" class="custom-select select2">
-			<option <?php echo !isset($supplier_id) ? 'selected' : '' ?> disabled></option>
-			<?php 
-			$supplier = $conn->query("SELECT * FROM `supplier_list` where status = 1 order by `name` asc");
-			while($row=$supplier->fetch_assoc()):
-			?>
-			<option value="<?php echo $row['id'] ?>" <?php echo isset($supplier_id) && $supplier_id == $row['id'] ? "selected" : "" ?> ><?php echo $row['name'] ?></option>
-			<?php endwhile; ?>
-			</select>
-		</div>
-		<div class="form-group">
 			<label for="status" class="control-label">Status</label>
 			<select name="status" id="status" class="custom-select selevt">
 			<option value="1" <?php echo isset($status) && $status == 1 ? 'selected' : '' ?>>Active</option>
