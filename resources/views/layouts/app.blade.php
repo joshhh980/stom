@@ -40,16 +40,23 @@
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    <!-- Top Navigation Bar & Sidebar can go here later -->
+    <!-- Injects your new component right here -->
+    @include('layouts.navigation')
 
     <!-- Main Workspace Content Wrapper -->
     <div class="content-wrapper">
         @yield('content')
     </div>
 
-    <!-- Combined Footer and script assets bundle -->
     @include('layouts.footer')
 
+        <!-- Core Runtime Plugins (Must load at the bottom before stack targets) -->
+    <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+    <script src="{{ asset('dist/js/adminlte.js') }}"></script>
+
+    <!-- Handle dynamic page stacks securely -->
+    @stack('scripts')
 </div>
 </body>
 </html>
