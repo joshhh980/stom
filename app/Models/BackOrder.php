@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasPurchaseOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -31,8 +32,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class BackOrder extends Model
 {
-    protected $table = 'back_order_list'; 
-    public $timestamps = true; 
+
+    use HasPurchaseOrderStatus;
+
+    protected $table = 'back_order_list';
+    public $timestamps = true;
 
     const CREATED_AT = 'date_created';
     const UPDATED_AT = 'date_updated';
@@ -69,6 +73,31 @@ class BackOrder extends Model
     public function items(): BelongsToMany
     {
         return $this->belongsToMany(Item::class, 'bo_items', 'bo_id', 'item_id')
-                    ->withPivot(['quantity', 'price', 'unit', 'total', 'expiry_date', 'batch_no']);
+            ->withPivot(['quantity', 'price', 'unit', 'total', 'expiry_date', 'batch_no']);
+    }
+
+
+    /**
+     * Check if the back order is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === PurchaseOrderStatus::PENDING;
+    }
+
+    /**
+     * Check if the back order is partially received.
+     */
+    public function isPartiallyReceived(): bool
+    {
+        return $this->status === PurchaseOrderStatus::PARTIALLY_RECEIVED;
+    }
+
+    /**
+     * Check if the back order is fully received.
+     */
+    public function isReceived(): bool
+    {
+        return $this->status === PurchaseOrderStatus::RECEIVED;
     }
 }
