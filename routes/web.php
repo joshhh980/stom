@@ -12,8 +12,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('purchase-orders', Controllers\PurchaseOrderController::class);
     Route::post('purchase-orders/import', [Controllers\PurchaseOrderController::class, "import"])->name('purchase-orders.import');
 
-    // Core Transaction stubs handled by Controllers\DashboardController
-    Route::get('/back-orders', [Controllers\DashboardController::class, 'backOrders'])->name('back-orders.index');
+    Route::resource('back-orders', Controllers\BackOrderController::class);
+    
     Route::get('/receiving', [Controllers\DashboardController::class, 'receiving'])->name('receiving.index');
     Route::get('/stocks', [Controllers\DashboardController::class, 'stocks'])->name('stocks.index');
     Route::get('/sales', [Controllers\DashboardController::class, 'sales'])->name('sales.index');
