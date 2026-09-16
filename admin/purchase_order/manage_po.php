@@ -64,17 +64,19 @@ if(isset($_GET['id'])){
                             <?php 
                                 $item_arr = array();
                                 $cost_arr = array();
-                                $item = $conn->query("SELECT * FROM `item_list` where status = 1 order by `name` asc");
-                                while($row=$item->fetch_assoc()):
-                                    $item_arr[$row['supplier_id']][$row['id']] = $row;
-                                    $cost_arr[$row['id']] = $row['cost'];
+                                $items = $conn->query("SELECT * FROM `item_list` where status = 1 order by `name` asc");
+                                while($row = $items->fetch_assoc()):
+                                    $item_arr[$row['id']] = $row;
                                 endwhile;
                             ?>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="item_id" class="control-label">Item</label>
-                                <select  id="item_id" class="custom-select ">
-                                    <option disabled selected></option>
+                                <select  id="item_id" class="custom-select select2">
+                                    <option disabled selected>Please select here</option>
+                                    <?php foreach($item_arr as $item_id => $item): ?>
+                                        <option value="<?php echo $item_id ?>"> <?php echo $item['name'] ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -240,7 +242,7 @@ if(isset($_GET['id'])){
             placeholder:"Please select here",
             width:'resolve',
         })
-        $('#item_id').select2({
+        /*$('#item_id').select2({
             placeholder:"Please select supplier first",
             width:'resolve',
         })
@@ -276,19 +278,21 @@ if(isset($_GET['id'])){
             }
 
         })
+        */
 
         $('#add_to_list').click(function(){
             var supplier = $('#supplier_id').val()
+            
             var item = $('#item_id').val()
             var qty = $('#qty').val() > 0 ? $('#qty').val() : 0;
             var price = costs[item] || 0
             var total = parseFloat(qty) *parseFloat(price)
-
+            
             var expiry_date = $('#expiry_date').val();
             var batch_no = $('#batch_no').val();
             // console.log(supplier,item)
-            var item_name = items[supplier][item].name || 'N/A';
-            var item_description = items[supplier][item].description || 'N/A';
+            var item_name = items[item].name || 'N/A';
+            var item_description = items[item].description || 'N/A';
             var tr = $('#clone_list tr').clone()
             if(item == '' || qty == ''){
                 alert_toast('Form Item textfields are required.','warning');

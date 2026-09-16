@@ -19,22 +19,14 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 		<div class="form-group">
 			<label for="description" class="control-label">Description</label>
 			<textarea name="description" id="description" cols="30" rows="2" class="form-control form no-resize"><?php echo isset($description) ? $description : ''; ?></textarea>
+		</div>		
+		<div class="form-group">
+			<label for="selling_price" class="control-label">Selling Price</label>
+			<input type="number" id="selling_price" step="any" class="form-control rounded-0 text-end" value="">
 		</div>
 		<div class="form-group">
 			<label for="cost" class="control-label">Cost</label>
 			<input type="number" name="cost" id="cost" step="any" class="form-control rounded-0 text-end" value="<?php echo isset($cost) ? $cost : ''; ?>">
-		</div>
-		<div class="form-group">
-			<label for="supplier_id" class="control-label">Supplier</label>
-			<select name="supplier_id" id="supplier_id" class="custom-select select2">
-			<option <?php echo !isset($supplier_id) ? 'selected' : '' ?> disabled></option>
-			<?php 
-			$supplier = $conn->query("SELECT * FROM `supplier_list` where status = 1 order by `name` asc");
-			while($row=$supplier->fetch_assoc()):
-			?>
-			<option value="<?php echo $row['id'] ?>" <?php echo isset($supplier_id) && $supplier_id == $row['id'] ? "selected" : "" ?> ><?php echo $row['name'] ?></option>
-			<?php endwhile; ?>
-			</select>
 		</div>
 		<div class="form-group">
 			<label for="status" class="control-label">Status</label>
@@ -60,17 +52,36 @@ if(isset($_GET['id']) && $_GET['id'] > 0){
 	</form>
 </div>
 <script>
-  
 	$(document).ready(function(){
         $('.select2').select2({placeholder:"Please Select here",width:"relative"})
+
+		$('#selling_price').blur(function(){
+			var sp = parseFloat($(this).val());
+			
+			// Get the percentage value, or default to 50 if the field is empty/invalid
+			var percentInput = $('#profit_margin_percent').val();
+			var profit_margin_percent = percentInput ? parseFloat(percentInput) : 50;
+
+			// Run the calculation if selling price is valid and percentage won't cause division by zero
+			if(!isNaN(sp) && sp > 0 && !isNaN(profit_margin_percent) && profit_margin_percent > -100){
+				var cost = sp / (1 + (profit_margin_percent / 100));
+				$('#cost').val(cost.toFixed(2));
+			} else {
+				$('#cost').val('');
+			}
+		});
+
 		$('#item-form').submit(function(e){
 			e.preventDefault();
             var _this = $(this)
 			 $('.err-msg').remove();
 			start_loader();
+
+			var formData = new FormData($(this)[0]);
+
 			$.ajax({
 				url:_base_url_+"classes/Master.php?f=save_item",
-				data: new FormData($(this)[0]),
+				data: formData,
                 cache: false,
                 contentType: false,
                 processData: false,

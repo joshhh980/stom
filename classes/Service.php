@@ -231,4 +231,68 @@ static function save_receiving($conn, $params)
 			
 	}
 }
+static function update_item_cost_from_sales($conn, $percent = 50)
+{
+    $resp = ['status' => 'success', 'updated' => 0, 'errors' => []];
+
+    // Only pull stock_list rows that are BOTH:
+    //  - tagged as a sale (type = 2), AND
+    //  - explicitly referenced by a sales_list.stock_ids entry
+    // Ordered newest-first so we can take the latest price per item.
+    $sql = "SELECT st.item_id, st.price
+            FROM `sales_list` sl
+            INNER JOIN `stock_list` st
+                ON FIND_IN_SET(st.id, sl.stock_ids)
+                AND st.type = 2
+            ORDER BY st.id DESC";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        $resp['status'] = 'failed';
+        $resp['msg'] = 'Failed to fetch sale prices. Error: ' . $conn->error;
+        return $resp;
+    }
+
+    $seen = [];
+
+    while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+        $item_id = (int) $row['item_id'];
+        $price   = (float) $row['price'];
+
+        // Results are newest-first, so the first time we see an item_id
+        // is its most recent sale price. Skip any repeats.
+        if (isset($seen[$item_id])) {
+            continue;
+        }
+        $seen[$item_id] = true;
+
+        if ($price <= 0) {
+            continue;
+        }
+
+        // Matches frontend: cost = sp / (1 + profit_margin_percent / 100)
+        $cost = $price / (1 + ($percent / 100));
+        $cost = round($cost, 2);
+
+        $update_sql = "UPDATE `item_list` SET `cost` = '{$cost}' WHERE `id` = '{$item_id}'";
+        $update = $conn->query($update_sql);
+
+        if ($update) {
+            $resp['updated']++;
+        } else {
+            $resp['errors'][] = [
+                'item_id' => $item_id,
+                'msg' => $conn->error,
+                'sql' => $update_sql
+            ];
+        }
+    }
+
+    if (!empty($resp['errors'])) {
+        $resp['status'] = 'partial';
+    }
+
+    return $resp;
+}
 }

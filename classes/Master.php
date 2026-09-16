@@ -107,24 +107,24 @@ Class Master extends DBConnection {
 				}
 			}
 		}
-		$check = $this->conn->query("SELECT * FROM `item_list` where `name` = '{$name}' and `supplier_id` = '{$supplier_id}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
+		$check = $this->conn->query("SELECT * FROM `item_list` where `name` = '{$name}' ".(!empty($id) ? " and id != {$id} " : "")." ")->num_rows;
 		if($this->capture_err())
 			return $this->capture_err();
 		if($check > 0){
 			$resp['status'] = 'failed';
-			$resp['msg'] = "Item already exists under selected supplier.";
+			$resp['msg'] = "Item already exists";
 			return json_encode($resp);
 			exit;
 		}
 		if(empty($id)){
 			$sql = "INSERT INTO `item_list` set {$data} ";
 			$save = $this->conn->query($sql);
-			$qty = $_POST['quantity'];
-			$expiry_date = $_POST['expiry_date'];
-			$batch_no = $_POST['batch_no'];
+			$qty = $this->conn->real_escape_string($_POST['quantity']);
+			$batch_no = $this->conn->real_escape_string($_POST['batch_no']);
+			$expiry_date = !empty($_POST['expiry_date']) ? "'" . $this->conn->real_escape_string($_POST['expiry_date']) . "'" : "NULL";			
 			$item_id = $this->conn->insert_id;
 			if($qty != ""){
-				$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', '{$expiry_date}', '{$batch_no}','1')";
+				$sql = "INSERT INTO stock_list (`item_id`,`quantity`, `expiry_date`, `batch_no`,`type`) VALUES ('{$item_id}','{$qty}', {$expiry_date}, '{$batch_no}','1')";
 				$save = $this->conn->query($sql);
 			}
 		
@@ -683,6 +683,9 @@ switch ($action) {
 	break;
 	case 'import_products':
 		echo $api->importProducts();
+	break;
+	case 'update_item_costs':
+		echo $api->updateItemCosts();
 	break;
 	default:
 		// echo $sysset->index();

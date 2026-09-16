@@ -3,6 +3,9 @@
 		<h3 class="card-title">List of Stocks</h3>
         <?php if($_settings->userdata('type') == 1): ?>
 			<div class="card-tools">
+				<button type="button" class="btn btn-flat btn-success add_item">
+					<span class="fas fa-plus"></span> Add Item
+				</button>
 				<a href="<?php echo base_url ?>admin/?page=stocks/manage_stock" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Add to Stock</a>
 			</div>
 			<div class="position-relative d-inline-block ml-2">
@@ -17,7 +20,7 @@
 	<div class="card-body">
 		<div class="container-fluid">
         <div class="container-fluid">
-			<table class="table table-bordered table-stripped">
+			<table class="table table-bordered table-stripped" id="stocks_table">
                     <colgroup>
                         <col width="5%">
                         <col width="20%">
@@ -74,8 +77,30 @@ if (($row['expiry_date'] ?? null) !== null && $row['expiry_date'] < $current_dat
 		$('.view_details').click(function(){
 			uni_modal("Receiving Details","receiving/view_receiving.php?id="+$(this).attr('data-id'),'mid-large')
 		})
+
+		// Delegated handler: covers the header "Add Item" button AND the button
+		// that gets injected into the "no results" row below, since that row
+		// only exists in the DOM after DataTables renders it.
+		$(document).on('click', '.add_item', function(){
+			uni_modal("Add Item","maintenance/manage_item.php",'mid-large')
+		})
+
 		$('.table td,.table th').addClass('py-1 px-2 align-middle')
-		$('.table').dataTable();
+
+		$('#stocks_table').DataTable({
+			language: {
+				zeroRecords: '<div class="text-center py-3">' +
+					'No items match your search.<br>' +
+					'<button type="button" class="btn btn-sm btn-success mt-2 add_item">' +
+					'<span class="fas fa-plus"></span> Add New Item</button>' +
+					'</div>',
+				emptyTable: '<div class="text-center py-3">' +
+					'No items in stock yet.<br>' +
+					'<button type="button" class="btn btn-sm btn-success mt-2 add_item">' +
+					'<span class="fas fa-plus"></span> Add New Item</button>' +
+					'</div>'
+			}
+		});
 	})
 	function delete_receiving($id){
 		start_loader();
