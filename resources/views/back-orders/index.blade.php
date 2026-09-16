@@ -5,7 +5,7 @@
     <div class="card-header">
         <h3 class="card-title">List of Back Orders</h3>
         <div class="card-tools">
-            <a href="{{ route('admin.back_order.create') }}" class="btn btn-flat btn-primary">
+            <a href="{{ route('back-orders.create') }}" class="btn btn-flat btn-primary">
                 <span class="fas fa-plus"></span> Create New
             </a>
         </div>
@@ -58,12 +58,12 @@
                                 </button>
                                 <div class="dropdown-menu" role="menu">
                                     @if($row->isPending())
-                                        <a class="dropdown-item" href="{{ route('admin.receiving.manage', ['bo_id' => $row->id]) }}">
+                                        <a class="dropdown-item" href="{{ route('receivings.index', ['bo_id' => $row->id]) }}">
                                             <span class="fa fa-boxes text-dark"></span> Receive
                                         </a>
                                         <div class="dropdown-divider"></div>
                                     @endif
-                                    <a class="dropdown-item" href="{{ route('admin.back_order.show', $row->id) }}">
+                                    <a class="dropdown-item" href="{{ route('back-orders.show', $row->id) }}">
                                         <span class="fa fa-eye text-dark"></span> View
                                     </a>
                                     <div class="dropdown-divider"></div>
@@ -105,7 +105,7 @@
     function delete_bo(id){
         start_loader();
         
-        let deleteUrl = "{{ route('admin.back_order.destroy', ':id') }}".replace(':id', id);
+        let deleteUrl = "{{ route('back-orders.destroy', ':id') }}".replace(':id', id);
 
         $.ajax({
             url: deleteUrl,
