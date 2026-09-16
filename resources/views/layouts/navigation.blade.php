@@ -50,7 +50,7 @@
 
                             <!-- Receiving -->
                             <li class="nav-item">
-                                <a href="{{ route('receiving.index') }}" class="nav-link {{ request()->routeIs('receiving.*') ? 'active' : '' }}">
+                                <a href="{{ route('receivings.index') }}" class="nav-link {{ request()->routeIs('receivings.*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-boxes"></i>
                                     <p>Receiving</p>
                                 </a>
