@@ -76,28 +76,4 @@ class BackOrder extends Model
             ->withPivot(['quantity', 'price', 'unit', 'total', 'expiry_date', 'batch_no']);
     }
 
-
-    /**
-     * Check if the back order is pending.
-     */
-    public function isPending(): bool
-    {
-        return $this->status === PurchaseOrderStatus::PENDING;
-    }
-
-    /**
-     * Check if the back order is partially received.
-     */
-    public function isPartiallyReceived(): bool
-    {
-        return $this->status === PurchaseOrderStatus::PARTIALLY_RECEIVED;
-    }
-
-    /**
-     * Check if the back order is fully received.
-     */
-    public function isReceived(): bool
-    {
-        return $this->status === PurchaseOrderStatus::RECEIVED;
-    }
 }
