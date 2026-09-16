@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasActiveStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -24,10 +26,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Supplier extends Model
 {
-    // Points directly to your table schema
+
+    use HasActiveStatus, HasFactory;
+
     protected $table = 'supplier_list';
 
-    public $timestamps = true; 
+    public $timestamps = true;
 
     const CREATED_AT = 'date_created';
     const UPDATED_AT = 'date_updated';
@@ -45,33 +49,24 @@ class Supplier extends Model
         'status',
     ];
 
-    /**
-     * Get the items supplied by this vendor.
-     */
     public function items(): HasMany
     {
         return $this->hasMany(Item::class, 'supplier_id');
     }
 
-    /**
-     * Get the purchase orders requested from this vendor.
-     */
+
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class, 'supplier_id');
     }
 
-    /**
-     * Get the back orders associated with this vendor.
-     */
+
     public function backOrders(): HasMany
     {
         return $this->hasMany(BackOrder::class, 'supplier_id');
     }
 
-    /**
-     * Get the product return logs linked to this vendor.
-     */
+
     public function returns(): HasMany
     {
         return $this->hasMany(ReturnLog::class, 'supplier_id');

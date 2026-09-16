@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasActiveStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,7 +29,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Item extends Model
 {
-    // Points directly to your table schema
+    use HasActiveStatus, HasFactory;
+    
     protected $table = 'item_list';
 
     public $timestamps = true; 
@@ -35,11 +38,7 @@ class Item extends Model
     const CREATED_AT = 'date_created';
     const UPDATED_AT = 'date_updated';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+
     protected $fillable = [
         'name',
         'description',
@@ -49,34 +48,23 @@ class Item extends Model
         'status',
     ];
 
-    /**
-     * Get the supplier who provides this item.
-     */
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
-    /**
-     * Get the stock ledger movements linked to this item.
-     */
     public function stocks(): HasMany
     {
         return $this->hasMany(Stock::class, 'item_id');
     }
 
-    /**
-     * Get the purchase orders this item belongs to.
-     */
     public function purchaseOrders(): BelongsToMany
     {
         return $this->belongsToMany(PurchaseOrder::class, 'po_items', 'item_id', 'po_id')
                     ->withPivot(['quantity', 'price', 'unit', 'total', 'expiry_date', 'batch_no']);
     }
 
-    /**
-     * Get the back orders this item belongs to.
-     */
     public function backOrders(): BelongsToMany
     {
         return $this->belongsToMany(BackOrder::class, 'bo_items', 'item_id', 'bo_id')
