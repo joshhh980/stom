@@ -37,18 +37,20 @@
     <script>var _base_url_ = "{{ url('/') }}/";</script>
     <script src="{{ asset('dist/js/script.js') }}"></script>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition{{ auth()->check() ? ' sidebar-mini layout-fixed' : '' }}">
 <div class="wrapper">
 
-    <!-- Injects your new component right here -->
-    @include('layouts.navigation')
+    @auth
+        @include('layouts.navigation')
+    @endauth
 
-    <!-- Main Workspace Content Wrapper -->
-    <div class="content-wrapper">
+    <div class="{{ auth()->check() ? 'content-wrapper' : '' }}">
         @yield('content')
     </div>
 
-    @include('layouts.footer')
+    @auth
+        @include('layouts.footer')
+    @endauth
 
         <!-- Core Runtime Plugins (Must load at the bottom before stack targets) -->
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
