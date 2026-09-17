@@ -2,40 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 
 use App\Models\Item;
-use App\Models\Supplier;
 use Carbon\Carbon;
+use App\Models\Stock;
+use App\Enums\Status;
+use App\Http\Requests\SaveStockRequest;
+use Illuminate\Http\JsonResponse;
 
 class StockController extends Controller
 {
 
-public function index()
-{
-    $today = Carbon::today();
+    public function index()
+    {
+        $today = Carbon::today();
 
-    $items = Item::with('supplier')
-        // Type 1 = Inwards movement (Exclude records that have already expired)
-        ->withSum(['stocks as total_in' => function ($query) use ($today) {
-            $query->where('type', 1)
-                  ->where(function ($q) use ($today) {
-                      $q->whereNull('expiry_date')
-                        ->orWhere('expiry_date', '>=', $today);
-                  });
-        }], 'quantity')
-        // Type 2 = Outwards movement (Deductions from inventory)
-        ->withSum(['stocks as total_out' => function ($query) {
-            $query->where('type', 2);
-        }], 'quantity')
-        ->get()
-        ->map(function ($item) {
-            // Compute structural running balance calculations inline
-            $item->available_stock = ($item->total_in ?? 0) - ($item->total_out ?? 0);
-            return $item;
-        });
+        $items = Item::with('supplier')
+            ->withSum(['stocks as total_in' => function ($query) use ($today) {
+                $query->where('type', 1)
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('expiry_date')
+                            ->orWhere('expiry_date', '>=', $today);
+                    });
+            }], 'quantity')
+            ->withSum(['stocks as total_out' => function ($query) {
+                $query->where('type', 2);
+            }], 'quantity')
+            ->get()
+            ->map(function ($item) {
+                $item->available_stock = ($item->total_in ?? 0) - ($item->total_out ?? 0);
+                return $item;
+            });
 
-    return view('stocks.index', compact('items'));
-}
+        return view('stocks.index', compact('items'));
+    }
 
+
+    public function createOrEdit(int $id = null)
+    {
+        $stock = $id ? Stock::findOrFail($id) : null;
+
+        $items = Item::where('status', Status::ACTIVE->value)
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('stocks.manage', compact('stock', 'items'));
+    }
+
+
+    public function store(SaveStockRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $item = Item::findOrFail($validated['item_id']);
+        $price = $item->cost ?? 0;
+
+        $stockData = [
+            'item_id'     => $validated['item_id'],
+            'quantity'    => $validated['quantity'],
+            'price'       => $price,
+            'total'       => $validated['quantity'] * $price,
+            'type'        => 1, // Type 1 = Inwards Inventory Adjustment Movement
+            'expiry_date' => $validated['expiry_date'],
+            'batch_no'    => $validated['batch_no'],
+        ];
+
+        Stock::updateOrCreate(['id' => $validated['id'] ?? null], $stockData);
+
+        return response()->json(['status' => 'success']);
+    }
 }

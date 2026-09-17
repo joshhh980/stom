@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
 
-    // Main Dashboard Landing Route
     Route::get('/', [Controllers\DashboardController::class, 'index'])->name('dashboard');
 
 
@@ -16,7 +15,8 @@ Route::middleware('auth')->group(function () {
     Route::get('receivings/manage', [Controllers\ReceivingController::class, 'manage'])->name('receivings.manage');
     Route::resource('receivings', Controllers\ReceivingController::class);
 
-    Route::resource('stocks', Controllers\StockController::class);
+    Route::resource('stocks', Controllers\StockController::class)->only(['index', 'store']);
+    Route::get('stocks/manage', [Controllers\StockController::class, 'createOrEdit'])->name('stocks.manage');
     Route::post('stocks/import', [Controllers\StockController::class, "import"])->name('stocks.import');
 
     Route::get('/sales', [Controllers\DashboardController::class, 'sales'])->name('sales.index');
