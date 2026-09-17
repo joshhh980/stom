@@ -42,6 +42,7 @@
 
     @auth
         @include('layouts.navigation')
+        @include('layouts.topbar')
     @endauth
 
     <div class="{{ auth()->check() ? 'content-wrapper' : '' }}">
