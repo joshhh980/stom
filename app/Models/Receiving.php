@@ -104,4 +104,9 @@ class Receiving extends Model
     {
         return $this->hasMany(BackOrder::class, 'receiving_id');
     }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class, 'supplier_id');
+    }
 }

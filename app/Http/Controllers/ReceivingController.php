@@ -38,9 +38,11 @@ class ReceivingController extends Controller
         $receiving = $action->execute($request->validated());
 
         $isNew = empty($request->input('id'));
-        session()->flash('success', $isNew
-            ? "New Stock was Successfully received."
-            : "Received Stock's Details Successfully updated."
+        session()->flash(
+            'success',
+            $isNew
+                ? "New Stock was Successfully received."
+                : "Received Stock's Details Successfully updated."
         );
 
         Log::info(($isNew ? "Receive Stock" : "Update Received Stock") . ": Processed record ID: {$receiving->id}");
@@ -131,5 +133,22 @@ class ReceivingController extends Controller
             'boCode',
             'items'
         ));
+    }
+
+
+    public function show(int $id)
+    {
+        // 💡 Load the supplier nested inside the orderSource graph instead
+        $receiving = Receiving::with(['orderSource.supplier'])->findOrFail($id);
+
+        $stockIds = array_filter(explode(',', $receiving->stock_ids));
+
+        $stocks = \App\Models\Stock::with('item')
+            ->whereIn('id', $stockIds)
+            ->get();
+
+        $computedSubTotal = $stocks->sum('total');
+
+        return view('receivings.show', compact('receiving', 'stocks', 'computedSubTotal'));
     }
 }
