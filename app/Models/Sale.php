@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * App\Models\Sales
+ * App\Models\Sale
  *
  * @property int $id
  * @property string $sales_code
@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $date_created
  * @property string $date_updated
  */
-class Sales extends Model
+class Sale extends Model
 {
     // Points directly to your table schema
     protected $table = 'sales_list';

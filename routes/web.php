@@ -19,7 +19,8 @@ Route::middleware('auth')->group(function () {
     Route::get('stocks/manage', [Controllers\StockController::class, 'createOrEdit'])->name('stocks.manage');
     Route::post('stocks/import', [Controllers\StockController::class, "import"])->name('stocks.import');
 
-    Route::get('/sales', [Controllers\DashboardController::class, 'sales'])->name('sales.index');
+    Route::resource('sales', Controllers\SaleController::class);
+    Route::get('sales/manage', [Controllers\SaleController::class, 'createOrEdit'])->name('sales.manage');
 
     // Maintenance stubs handled by Controllers\DashboardController
     Route::get('/suppliers', [Controllers\DashboardController::class, 'suppliers'])->name('suppliers.index');
