@@ -16,12 +16,14 @@ Route::middleware('auth')->group(function () {
     Route::get('receivings/manage', [Controllers\ReceivingController::class, 'manage'])->name('receivings.manage');
     Route::resource('receivings', Controllers\ReceivingController::class);
 
-    Route::get('/stocks', [Controllers\DashboardController::class, 'stocks'])->name('stocks.index');
+    Route::resource('stocks', Controllers\StockController::class);
+    Route::post('stocks/import', [Controllers\StockController::class, "import"])->name('stocks.import');
+
     Route::get('/sales', [Controllers\DashboardController::class, 'sales'])->name('sales.index');
 
     // Maintenance stubs handled by Controllers\DashboardController
     Route::get('/suppliers', [Controllers\DashboardController::class, 'suppliers'])->name('suppliers.index');
-    Route::get('/items', [Controllers\DashboardController::class, 'items'])->name('items.index');
+    Route::resource('/items', Controllers\DashboardController::class);
     Route::get('/users', [Controllers\DashboardController::class, 'users'])->name('users.index');
     Route::get('/settings', [Controllers\DashboardController::class, 'settings'])->name('settings.index');
 });
