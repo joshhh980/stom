@@ -2,45 +2,24 @@
 
 namespace App\Models;
 
+use App\Enums\ReceivingOrigin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Receiving
- *
- * @property int $id
- * @property int $form_id ID referencing either purchase_order_list or back_order_list
- * @property int $from_order 1 = From PO, 2 = From BO
- * @property float $amount
- * @property float $discount_perc
- * @property float $discount
- * @property float $tax_perc
- * @property float $tax
- * @property string|null $stock_ids
- * @property string|null $remarks
- * @property string $date_created
- * @property string $date_updated
- * 
- * @property-read \App\Models\PurchaseOrder $purchaseOrder
- * @property-read \App\Models\BackOrder $backOrder
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\BackOrder[] $backOrdersCreated
+ * ... (Keep your existing PHPDocs here)
  */
 class Receiving extends Model
 {
-    // Points directly to your table schema
     protected $table = 'receiving_list';
 
-    public $timestamps = true; 
+    public $timestamps = true;
 
     const CREATED_AT = 'date_created';
     const UPDATED_AT = 'date_updated';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'form_id',
         'from_order',
@@ -52,6 +31,55 @@ class Receiving extends Model
         'stock_ids',
         'remarks',
     ];
+
+    /**
+     * Define the data types casts mappings.
+     */
+    protected function casts(): array
+    {
+        return [
+            'from_order'   => ReceivingOrigin::class, // Bind the enum class cast here
+            'date_created' => 'datetime',
+            'date_updated' => 'datetime',
+        ];
+    }
+
+    /**
+     * Get the origin order source (PurchaseOrder or BackOrder) dynamically.
+     */
+    public function orderSource(): BelongsTo
+    {
+        if ($this->from_order === ReceivingOrigin::PURCHASE_ORDER) {
+            return $this->belongsTo(PurchaseOrder::class, 'form_id');
+        }
+
+        return $this->belongsTo(BackOrder::class, 'form_id');
+    }
+
+    /**
+     * Get the descriptive code string for the view layer layout pipeline.
+     */
+    public function getSourceCodeAttribute(): string
+    {
+        if ($this->from_order === ReceivingOrigin::PURCHASE_ORDER) {
+            return $this->orderSource->po_code ?? 'N/A';
+        }
+
+        return $this->orderSource->bo_code ?? 'N/A';
+    }
+
+    /**
+     * Parse the comma-separated string of stock_ids into a clean item integer count.
+     */
+    public function getItemsCountAttribute(): int
+    {
+        if (blank($this->stock_ids)) {
+            return 0;
+        }
+
+        return count(explode(',', $this->stock_ids));
+    }
+
 
     /**
      * Get the source Purchase Order (if from_order == 1).

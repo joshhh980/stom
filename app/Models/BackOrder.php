@@ -55,6 +55,18 @@ class BackOrder extends Model
         'status',
     ];
 
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($backOrder) {
+            if (empty($backOrder->bo_code)) {
+                $backOrder->bo_code = self::generateUniqueBoCode();
+            }
+        });
+    }
+
     public function receiving(): BelongsTo
     {
         return $this->belongsTo(Receiving::class, 'receiving_id');
@@ -76,4 +88,11 @@ class BackOrder extends Model
             ->withPivot(['quantity', 'price', 'unit', 'total', 'expiry_date', 'batch_no']);
     }
 
+    public static function generateUniqueBoCode(): string
+    {
+        $prefix = "BO";
+        $latest = self::where('bo_code', 'LIKE', "{$prefix}-%")->orderBy('bo_code', 'desc')->first();
+        $nextNum = $latest ? ((int) substr($latest->bo_code, 3)) + 1 : 1;
+        return sprintf("%s-%'.04d", $prefix, $nextNum);
+    }
 }
