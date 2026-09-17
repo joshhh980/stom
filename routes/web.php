@@ -13,6 +13,7 @@ Route::middleware('auth')->group(function () {
     Route::post('purchase-orders/import', [Controllers\PurchaseOrderController::class, "import"])->name('purchase-orders.import');
 
     Route::resource('back-orders', Controllers\BackOrderController::class);
+    Route::get('receivings/manage', [Controllers\ReceivingController::class, 'manage'])->name('receivings.manage');
     Route::resource('receivings', Controllers\ReceivingController::class);
 
     Route::get('/stocks', [Controllers\DashboardController::class, 'stocks'])->name('stocks.index');

@@ -87,7 +87,7 @@
                                 <div class="dropdown-menu" role="menu">
                                     <!-- Check if Pending for Receiving -->
                                     @if($po->status === \App\Enums\PurchaseOrderStatus::PENDING)
-                                    <a class="dropdown-item" href="#"><span class="fa fa-boxes text-dark"></span> Receive</a>
+                                    <a class="dropdown-item" href="{{ route('receivings.manage', ['po_id' => $po->id]) }}"><span class="fa fa-boxes text-dark"></span> Receive</a>
                                     <div class="dropdown-divider"></div>
                                     @endif
 
