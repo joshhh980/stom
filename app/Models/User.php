@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserType;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,6 +79,7 @@ class User extends Authenticatable
         return [
             'last_login' => 'datetime',
             'password' => 'hashed',
+            'type' => UserType::class,
         ];
     }
 }

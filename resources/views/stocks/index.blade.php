@@ -5,7 +5,7 @@
     <div class="card-header">
         <h3 class="card-title">List of Stocks</h3>
         
-        @if(auth()->user() && auth()->user()->type == 1)
+        @if(auth()->user() && auth()->user()->type == \App\Enums\UserType::ADMIN)
             <div class="card-tools">
                 <button type="button" class="btn btn-flat btn-success add_item">
                     <span class="fas fa-plus"></span> Add Item

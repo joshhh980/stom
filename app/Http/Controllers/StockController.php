@@ -7,6 +7,7 @@ use App\Models\Item;
 use Carbon\Carbon;
 use App\Models\Stock;
 use App\Enums\Status;
+use App\Enums\StockType;
 use App\Http\Requests\SaveStockRequest;
 use Illuminate\Http\JsonResponse;
 
@@ -19,14 +20,14 @@ class StockController extends Controller
 
         $items = Item::with('supplier')
             ->withSum(['stocks as total_in' => function ($query) use ($today) {
-                $query->where('type', 1)
+                $query->where('type', StockType::IN)
                     ->where(function ($q) use ($today) {
                         $q->whereNull('expiry_date')
                             ->orWhere('expiry_date', '>=', $today);
                     });
             }], 'quantity')
             ->withSum(['stocks as total_out' => function ($query) {
-                $query->where('type', 2);
+                $query->where('type', StockType::OUT);
             }], 'quantity')
             ->get()
             ->map(function ($item) {
@@ -62,7 +63,7 @@ class StockController extends Controller
             'quantity'    => $validated['quantity'],
             'price'       => $price,
             'total'       => $validated['quantity'] * $price,
-            'type'        => 1, // Type 1 = Inwards Inventory Adjustment Movement
+            'type'        => StockType::IN,
             'expiry_date' => $validated['expiry_date'],
             'batch_no'    => $validated['batch_no'],
         ];

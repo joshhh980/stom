@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\StockType;
 use App\Models\Receiving;
 use App\Models\Stock;
 
@@ -23,7 +24,7 @@ class SyncStockAllocations
                 'quantity'    => $qty,
                 'price'       => $price,
                 'total'       => $total,
-                'type'        => 1,
+                'type'        => StockType::IN,
                 'expiry_date' => $data['expiry_date'][$k] ?? null,
                 'batch_no'    => $data['batch_no'][$k] ?? null,
             ]);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StockType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,6 +39,13 @@ class Stock extends Model
         'expiry_date',
         'batch_no',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'type' => StockType::class,
+        ];
+    }
 
     public function item(): BelongsTo
     {
