@@ -23,8 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::get('sales/manage/{id?}', [Controllers\SaleController::class, 'createOrEdit'])->name('sales.manage');
     Route::resource('sales', Controllers\SaleController::class);
 
-    // Maintenance stubs handled by Controllers\DashboardController
-    Route::get('/suppliers', [Controllers\DashboardController::class, 'suppliers'])->name('suppliers.index');
+    Route::resource('suppliers', Controllers\SupplierController::class);    
+    
     Route::resource('/items', Controllers\DashboardController::class);
     Route::get('/users', [Controllers\DashboardController::class, 'users'])->name('users.index');
     Route::get('/settings', [Controllers\DashboardController::class, 'settings'])->name('settings.index');
