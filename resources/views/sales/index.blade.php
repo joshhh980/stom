@@ -5,7 +5,7 @@
     <div class="card-header">
         <h3 class="card-title">List of Sales</h3>
         <div class="card-tools">
-            <a href="{{ route('sales.create') }}" class="btn btn-flat btn-primary">
+            <a href="{{ route('sales.manage') }}" class="btn btn-flat btn-primary">
                 <span class="fas fa-plus"></span> Create New
             </a>
         </div>

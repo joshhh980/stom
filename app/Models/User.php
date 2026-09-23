@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\UserType;
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -38,7 +37,7 @@ class User extends Authenticatable
      *
      * @var bool
      */
-    public $timestamps = true; 
+    public $timestamps = true;
 
     /**
      * Map Laravel's triggers to your existing custom database fields.
@@ -81,5 +80,10 @@ class User extends Authenticatable
             'password' => 'hashed',
             'type' => UserType::class,
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->type === \App\Enums\UserType::ADMIN;
     }
 }
