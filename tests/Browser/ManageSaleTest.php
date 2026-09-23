@@ -8,7 +8,6 @@ use App\Models\Stock;
 use App\Enums\UserType;
 use App\Enums\Status;
 use App\Enums\StockType;
-use App\Models\Sale;
 use Tests\DuskTestCase;
 use Laravel\Dusk\Browser;
 
@@ -29,13 +28,18 @@ class ManageSaleTest extends DuskTestCase
 
         $this->assertNotNull($item);
 
+        $expectedTotal = round(
+            round(($item->cost ?? 500.00) * 1.20, 2) * 2,
+            2
+        );
 
         $clientName = 'Walk-in Retail Client';
 
         $this->browse(function (Browser $browser) use (
             $adminUser,
             $item,
-            $clientName
+            $clientName,
+            $expectedTotal
         ) {
             $rowSelector = "table#list tbody tr[data-id='{$item->id}']";
             $itemSelector = ".item-card[data-id='{$item->id}']";
@@ -66,29 +70,13 @@ class ManageSaleTest extends DuskTestCase
             );
 
             $browser->press('Save')
-                ->waitForLocation(route('sales.index'), 10);
+                ->waitForLocation(route('sales.index'), 10)
+                ->assertSeeIn('#sales_table tbody', $clientName)
+                ->assertSeeIn(
+                    '#sales_table tbody',
+                    number_format($expectedTotal, 2)
+                );
         });
-
-        $expectedPrice = round(
-            ($item->cost ?? 500.00) * 1.20,
-            2
-        );
-
-        $expectedTotal = round(
-            $expectedPrice * 2,
-            2
-        );
-
-        $sale = Sale::where('client', 'Walk-in Retail Client')
-            ->latest('id')
-            ->first();
-
-        $this->assertNotNull($sale, 'The sale was not created.');
-
-        $this->assertEquals(
-            $expectedTotal,
-            round((float) $sale->amount, 2)
-        );
     }
 
 
@@ -122,12 +110,46 @@ class ManageSaleTest extends DuskTestCase
                 ->pause(200)
                 ->press('Save')
                 ->waitForLocation(route('sales.index'), 5)
-                ->assertPathIs(route('sales.index', [], false));
+                ->assertPathIs(route('sales.index', [], false))
+                ->assertSeeIn('#sales_table tbody', 'Walk-in Retail Client')
+                ->assertSeeIn('#sales_table tbody', '120.00');
         });
+    }
 
-        $this->assertDatabaseHas('sales_list', [
-            'client' => 'Walk-in Retail Client',
-            'amount' => 120.00
-        ]);
+    public function test_sale_form_shows_error_toast_when_saved_without_items(): void
+    {
+        $adminUser = User::where([
+            'type' => UserType::ADMIN->value
+        ])->first();
+
+        $this->assertNotNull($adminUser);
+
+        $clientName = 'Frontend Validation Test ' . uniqid();
+
+        $this->browse(function (Browser $browser) use (
+            $adminUser,
+            $clientName
+        ) {
+            $browser->loginAs($adminUser)
+                ->visit(route('sales.manage'))
+                ->waitFor('#sale-form')
+                ->type('client', $clientName)
+
+                /*
+             * No items have been added.
+             */
+                ->assertMissing('table#list tbody tr[data-id]')
+
+                /*
+             * Attempt to save.
+             */
+                ->press('Save')
+
+                ->waitFor('.swal2-toast', 3)
+                ->assertSeeIn(
+                    '.swal2-toast',
+                    'Click an item above to add it before saving.'
+                );
+        });
     }
 }

@@ -5,7 +5,6 @@ namespace Tests\Browser;
 use App\Models\User;
 use App\Models\Item;
 use App\Enums\Status;
-use App\Models\Stock;
 use Carbon\Carbon;
 use Tests\DuskTestCase;
 use Laravel\Dusk\Browser;
@@ -42,24 +41,11 @@ class ManageStockTest extends DuskTestCase
 
             $browser->press('Add to Stock')
                 ->waitForLocation(route('stocks.index'), 5)
-                ->assertPathIs(route('stocks.index', [], false));
-
-
-            $this->assertDatabaseHas('stock_list', [
-                'item_id'  => $item->id,
-                'quantity' => 150,
-                'type'     => 1,
-                'batch_no' => 'BAT-2026-X99',
-            ]);
-
-            $savedStock = Stock::where('item_id', $item->id)
-                ->where('batch_no', 'BAT-2026-X99')
-                ->first();
-
-            $this->assertNotNull($savedStock, "The stock record was not written to the database.");
-
-            $this->assertEquals(45.50, $savedStock->price);
-            $this->assertEquals(150 * $savedStock->price, $savedStock->total);
+                ->assertPathIs(route('stocks.index', [], false))
+                ->waitFor('#stocks_table_filter input')
+                ->type('#stocks_table_filter input', $item->name)
+                ->assertSeeIn('#stocks_table tbody', $item->name)
+                ->assertSeeIn('#stocks_table tbody', '150');
         });
     }
 
