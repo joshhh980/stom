@@ -18,24 +18,57 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Sale extends Model
 {
-    // Points directly to your table schema
     protected $table = 'sales_list';
 
-    public $timestamps = true; 
+    public $timestamps = true;
 
     const CREATED_AT = 'date_created';
     const UPDATED_AT = 'date_updated';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'sales_code',
         'client',
         'amount',
         'remarks',
         'stock_ids',
+        'date_created',
     ];
+
+    /**
+     * Generate the next sales code automatically
+     * whenever a new Sale is created.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Sale $sale) {
+            if (!empty($sale->sales_code)) {
+                return;
+            }
+
+            $prefix = 'SALE-';
+
+            $latestSale = static::where(
+                'sales_code',
+                'LIKE',
+                "{$prefix}%"
+            )
+                ->orderBy('sales_code', 'desc')
+                ->first();
+
+            if ($latestSale) {
+                $lastNumber = (int) str_replace(
+                    $prefix,
+                    '',
+                    $latestSale->sales_code
+                );
+
+                $nextNumber = $lastNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            $sale->sales_code =
+                $prefix . sprintf('%04d', $nextNumber);
+        });
+    }
 }
