@@ -7,7 +7,7 @@
         <dt class="text-info">Cost:</dt>
         <dd class="pl-3">{{ number_format($item->cost, 2) }}</dd>
         <dt class="text-info">Supplier:</dt>
-        <dd class="pl-3">{{ $item->supplier->name ?? 'N/A' }}</dd>
+        <dd class="pl-3">{{ $item->supplier_id ?? 'N/A' }}</dd>
         <dt class="text-info">Status:</dt>
         <dd class="pl-3">
             <span class="badge badge-{{ $item->status->value ? 'success' : 'danger' }} rounded-pill">

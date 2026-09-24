@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasActiveStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -22,7 +21,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $date_created
  * @property string $date_updated
  * 
- * @property-read \App\Models\Supplier|null $supplier
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Stock[] $stocks
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\PurchaseOrder[] $purchaseOrders
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\BackOrder[] $backOrders
@@ -48,11 +46,6 @@ class Item extends Model
         'status',
     ];
 
-
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
-    }
 
     public function stocks(): HasMany
     {

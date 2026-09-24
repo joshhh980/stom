@@ -6,7 +6,6 @@ use App\Enums\StockType;
 use App\Http\Requests\StoreItemRequest;
 use App\Models\Item;
 use App\Models\Stock;
-use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -22,9 +21,8 @@ class ItemController extends Controller
     public function create()
     {
         $item = new Item(['status' => 1]);
-        $suppliers = Supplier::orderBy('name')->get();
 
-        return view('items.manage', compact('item', 'suppliers'));
+        return view('items.manage', compact('item'));
     }
 
     public function store(StoreItemRequest $request): JsonResponse
@@ -37,7 +35,7 @@ class ItemController extends Controller
             $item = Item::updateOrCreate(
                 ['id' => $id],
                 collect($validated)->only([
-                    'name', 'description', 'supplier_id', 'cost', 'status',
+                    'name', 'description', 'cost', 'status',
                 ])->all()
             );
 
@@ -64,16 +62,12 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
-        $item->load('supplier');
-
         return view('items.show', compact('item'));
     }
 
     public function edit(Item $item)
     {
-        $suppliers = Supplier::orderBy('name')->get();
-
-        return view('items.manage', compact('item', 'suppliers'));
+        return view('items.manage', compact('item'));
     }
 
     public function destroy(Item $item): JsonResponse

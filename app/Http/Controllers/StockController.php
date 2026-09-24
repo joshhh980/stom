@@ -18,8 +18,7 @@ class StockController extends Controller
     {
         $today = Carbon::today();
 
-        $items = Item::with('supplier')
-            ->withSum(['stocks as total_in' => function ($query) use ($today) {
+        $items = Item::withSum(['stocks as total_in' => function ($query) use ($today) {
                 $query->where('type', StockType::IN)
                     ->where(function ($q) use ($today) {
                         $q->whereNull('expiry_date')

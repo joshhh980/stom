@@ -47,7 +47,7 @@
                         <tr>
                             <td class="text-center align-middle py-1 px-2">{{ $loop->iteration }}</td>
                             <td class="align-middle py-1 px-2">{{ $row->name }}</td>
-                            <td class="align-middle py-1 px-2">{{ $row->supplier->name ?? 'N/A' }}</td>
+                            <td class="align-middle py-1 px-2">{{ $row->supplier_id ?? 'N/A' }}</td>
                             <td class="align-middle py-1 px-2">{{ $row->description }}</td>
                             <td class="text-right align-middle py-1 px-2 font-weight-bold">
                                 {{ number_format($row->available_stock) }}

@@ -27,7 +27,6 @@ class StoreItemRequest extends FormRequest
                 Rule::unique('item_list', 'name')->ignore($this->input('id')),
             ],
             'description' => 'nullable|string',
-            'supplier_id' => 'nullable|integer|exists:supplier_list,id',
             'cost'        => 'required|numeric|min:0',
             'status'      => ['required', new Enum(Status::class)],
             'quantity'    => [$isUpdate ? 'nullable' : 'nullable', 'integer', 'min:0'],

@@ -12,15 +12,6 @@
             <textarea name="description" id="description" rows="2" class="form-control">{{ old('description', $item->description) }}</textarea>
         </div>
         <div class="form-group">
-            <label for="supplier_id">Supplier</label>
-            <select name="supplier_id" id="supplier_id" class="custom-select">
-                <option value="">Select supplier</option>
-                @foreach($suppliers as $supplier)
-                <option value="{{ $supplier->id }}" @selected(old('supplier_id', $item->supplier_id) == $supplier->id)>{{ $supplier->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="form-group">
             <label for="cost">Cost</label>
             <input type="number" name="cost" id="cost" step="any" min="0" class="form-control text-right" value="{{ old('cost', $item->cost) }}" required>
         </div>
