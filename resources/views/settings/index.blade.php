@@ -1,12 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@if(session('success'))
-<script>
-    alert_toast("{{ session('success') }}", 'success');
-</script>
-@endif
-
 <style>
     img#cimg {
         height: 15vh;
@@ -20,6 +14,16 @@
         object-fit: contain;
     }
 </style>
+<div class="container-fluid p-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <div class="col-lg-12">
     <div class="card card-outline card-primary">
         <div class="card-header">
@@ -67,6 +71,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 <script>
     function displayImg(input, _this) {

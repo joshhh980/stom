@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container-fluid p-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">List of Stocks</h3>
@@ -14,13 +24,14 @@
                     <span class="fas fa-plus"></span> Add to Stock
                 </a>
             </div>
-            <div class="position-relative d-inline-block ml-2">
+           <!-- <div class="position-relative d-inline-block ml-2">
                 <form action="{{ route('stocks.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="file" name="excel_file" accept=".xlsx, .xls, .csv" required>
                     <button class="btn btn-flat btn-primary position-relative" type="submit">Upload Stock</button>
                 </form>
             </div>
+-->
         @endif
     </div>
     <div class="card-body">
@@ -58,6 +69,7 @@
             </table>
         </div>
     </div>
+</div>
 </div>
 
 <script>

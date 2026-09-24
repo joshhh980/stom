@@ -2,20 +2,16 @@
 
 @section('content')
 <div class="container-fluid p-4">
-
-    <!-- 👈 ADD THIS SESSION LISTENER LAYER HERE -->
     @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
         <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
-        <button type="button" class="close" data-dismiss="ajax" aria-label="Close">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     @endif
 
     <div class="card card-outline card-primary">
-        <!-- Your List of Purchase Orders Table markup remains here unchanged ... -->
-
         <div class="card-header">
             <h3 class="card-title">List of Purchase Orders</h3>
             <div class="card-tools d-flex justify-content-between">
@@ -101,24 +97,7 @@
                                     @endif
 
                                     <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="{{ $po->id }}"><span class="fa fa-trash text-danger"></span> Delete</a>
-                                    <div class="dropdown-menu" role="menu">
-                                        @if($po->isPending())
-                                        <a class="dropdown-item" href="#"><span class="fa fa-boxes text-dark"></span> Receive</a>
-                                        <div class="dropdown-divider"></div>
-                                        @endif
-
-                                        <a class="dropdown-item" href="{{ route('purchase-orders.show', ['purchase_order' => $po->id]) }}"><span class="fa fa-eye text-dark"></span> View</a>
-                                        <div class="dropdown-divider"></div>
-
-                                        @if($po->isPending())
-                                        <a class="dropdown-item" href="{{ route('purchase-orders.edit', ['purchase_order' => $po->id]) }}"> <span class="fa fa-edit text-primary"></span> Edit</a>
-                                        <div class="dropdown-divider"></div>
-                                        @endif
-
-                                        <a class="dropdown-item delete_data" href="javascript:void(0)" data-id="{{ $po->id }}"><span class="fa fa-trash text-danger"></span> Delete</a>
-                                    </div>
-
-
+                                </div>
                             </td>
                         </tr>
                         @endforeach

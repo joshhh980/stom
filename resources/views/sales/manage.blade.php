@@ -3,6 +3,16 @@
 @section('content')
 @include('sales.partials.styles')
 
+<div class="container-fluid p-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <div class="card card-outline card-primary">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="card-title mb-0">
@@ -145,6 +155,7 @@
         </button>
         <a class="btn btn-flat btn-dark" href="{{ route('sales.index') }}">Cancel</a>
     </div>
+</div>
 </div>
 
 {{-- Hidden HTML Clone Row Template Layer --}}

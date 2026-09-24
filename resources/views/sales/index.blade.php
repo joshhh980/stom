@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container-fluid p-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h3 class="card-title">List of Sales</h3>
@@ -76,6 +86,7 @@
             </table>
         </div>
     </div>
+</div>
 </div>
 
 <script>

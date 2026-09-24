@@ -15,6 +15,16 @@
     }
 </style>
 
+<div class="container-fluid p-4">
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-0" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <div class="card card-outline card-primary">
     <div class="card-header">
         <h4 class="card-title">{{ isset($stock) ? 'Update Stock Record' : 'Create New Stock Record' }}</h4>
@@ -76,6 +86,10 @@
             </div>
         </form>
     </div>
+    <div class="card-footer py-1 text-center">
+        <a class="btn btn-flat btn-dark" href="{{ route('stocks.index') }}">Cancel</a>
+    </div>
+</div>
 </div>
 
 <script>
