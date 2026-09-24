@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $unit
  * @property float|null $price
  * @property float|null $total
- * @property int $type 1 = IN, 2 = OUT
+ * @property StockType $type 1 = IN, 2 = OUT
  * @property string $date_created
  * @property string|null $expiry_date
  * @property string|null $batch_no

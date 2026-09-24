@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Status;
 use App\Traits\HasActiveStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int|null $supplier_id
  * @property float $cost
  * @property float|null $cost_price
- * @property int $status 0 = inactive, 1 = active
+ * @property Status $status 0 = inactive, 1 = active
  * @property string $date_created
  * @property string $date_updated
  * 

@@ -9,7 +9,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Receiving
- * ... (Keep your existing PHPDocs here)
+ *
+ * @property int $id
+ * @property int $form_id
+ * @property ReceivingOrigin $from_order 1 = purchase order, 2 = back order
+ * @property float $amount
+ * @property float $discount_perc
+ * @property float $discount
+ * @property float $tax_perc
+ * @property float $tax
+ * @property string|null $stock_ids
+ * @property string|null $remarks
+ * @property \Illuminate\Support\Carbon|null $date_created
+ * @property \Illuminate\Support\Carbon|null $date_updated
+ *
+ * @property-read \App\Models\PurchaseOrder|\App\Models\BackOrder|null $orderSource
+ * @property-read \App\Models\PurchaseOrder|null $purchaseOrder
+ * @property-read \App\Models\BackOrder|null $backOrder
+ * @property-read \App\Models\Supplier|null $supplier
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\BackOrder> $backOrdersCreated
  */
 class Receiving extends Model
 {

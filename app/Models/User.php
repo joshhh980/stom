@@ -19,7 +19,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string|null $remember_token
  * @property string|null $avatar
  * @property string|null $last_login
- * @property int $type 0 = standard user, 1 = admin
+ * @property UserType $type 0 = standard user, 1 = admin
  * @property string $date_added Custom creation timestamp
  * @property string|null $date_updated Custom update timestamp
  * @property \Illuminate\Support\Carbon|null $created_at Original framework migration field

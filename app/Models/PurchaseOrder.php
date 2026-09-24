@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property float $tax_perc
  * @property float $tax
  * @property string $remarks
- * @property \App\Enums\PurchaseOrderStatus $status
+ * @property PurchaseOrderStatus $status 0 = pending, 1 = partially received, 2 = received
  * @property string $date_created
  * @property string $date_updated
  * 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PurchaseOrderStatus;
 use App\Traits\HasPurchaseOrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property float $tax_perc
  * @property float $tax
  * @property string|null $remarks
- * @property int $status 0 = pending, 1 = partially received, 2 = received
+ * @property PurchaseOrderStatus $status 0 = pending, 1 = partially received, 2 = received
  * @property string $date_created
  * @property string $date_updated
  * 
