@@ -21,6 +21,10 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
  */
 class ImportPurchaseOrder
 {
+    public function __construct(
+        protected ReceiveImportedPurchaseOrder $receiveAction
+    ) {}
+
     /**
      * Parse and execute the Excel file import sequence.
      * 
@@ -141,8 +145,7 @@ class ImportPurchaseOrder
 
             // 5. Action Group: Execute Immediate Receiving Pipeline (If requested)
             if ($shouldReceiveImmediately) {
-                // If you have a separate dynamic Receiving Model, attach its trigger method context structure here
-                // Example: Receiving::create([...]);
+                $this->receiveAction->execute($purchaseOrder, $itemsPayload);
             }
 
             return $purchaseOrder;

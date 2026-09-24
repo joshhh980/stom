@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSupplierRequest;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
 
 class SupplierController extends Controller
 {
@@ -25,6 +26,13 @@ class SupplierController extends Controller
     {
         $supplier = Supplier::findOrFail($id);
         return view('suppliers.manage', compact('supplier'));
+    }
+
+    public function show(int $id)
+    {
+        return view('suppliers.show', [
+            'supplier' => Supplier::findOrFail($id),
+        ]);
     }
 
     public function store(StoreSupplierRequest $request)
@@ -50,6 +58,32 @@ class SupplierController extends Controller
                 'status' => 'failed',
                 'msg' => 'An error occurred while saving: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+
+            if ($supplier->purchaseOrders()->exists() || $supplier->backOrders()->exists() || $supplier->returns()->exists()) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'This supplier cannot be deleted because it is referenced by transaction records.',
+                ], 422);
+            }
+
+            $supplier->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Supplier successfully deleted.',
+            ]);
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Unable to delete supplier: ' . $exception->getMessage(),
+            ], 422);
         }
     }
 }
