@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('suppliers', Controllers\SupplierController::class);
     Route::resource('items', Controllers\ItemController::class);
     Route::resource('users', Controllers\UserController::class);
+    Route::get('/audit-logs', [Controllers\AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::get('/settings', [Controllers\SystemSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [Controllers\SystemSettingsController::class, 'update'])->name('settings.update');
 });
