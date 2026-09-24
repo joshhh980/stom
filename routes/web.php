@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('suppliers', Controllers\SupplierController::class);    
     
-    Route::resource('/items', Controllers\DashboardController::class);
+    Route::resource('/items', Controllers\ItemController::class);
     Route::get('/users', [Controllers\DashboardController::class, 'users'])->name('users.index');
     Route::get('/settings', [Controllers\DashboardController::class, 'settings'])->name('settings.index');
 });
