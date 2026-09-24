@@ -29,7 +29,7 @@
             <input type="hidden" name="from_order" value="{{ $boId ? \App\Enums\ReceivingOrigin::BACK_ORDER->value : \App\Enums\ReceivingOrigin::PURCHASE_ORDER->value }}"> <input type="hidden" name="form_id" value="{{ $boId ?? $poId }}">
             <input type="hidden" name="po_id" value="{{ $poId ?? '' }}">
 
-            @if(auth()->user() && auth()->user()->type == \App\Enums\UserType::ADMIN)
+            @if(auth()->user()?->isAdmin())
             <input name="date_created" type="hidden" value="{{ $receiving->date_created ?? '' }}">
             @endif
 

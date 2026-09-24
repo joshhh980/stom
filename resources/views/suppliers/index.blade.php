@@ -45,7 +45,7 @@
                         <td>{{ $supplier->name }}</td>
                         <td>{{ $supplier->cperson }}</td>
                         <td class="text-center">
-                            @if($supplier->status === \App\Enums\Status::ACTIVE)
+                            @if($supplier->isActive())
                             <span class="badge badge-success rounded-pill">Active</span>
                             @else
                             <span class="badge badge-danger rounded-pill">Inactive</span>

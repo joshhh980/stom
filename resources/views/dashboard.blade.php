@@ -72,7 +72,7 @@
         </div>
 
         <!-- Admin-Only Users Count -->
-        @if(auth()->user() && auth()->user()->type == \App\Enums\UserType::ADMIN)
+        @if(auth()->user()?->isAdmin())
         <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box bg-light shadow">
                 <span class="info-box-icon bg-teal elevation-1"><i class="fas fa-users"></i></span>

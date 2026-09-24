@@ -25,7 +25,7 @@
                     </a>
                 </div>
 
-                @if(auth()->user() && auth()->user()->type == \App\Enums\UserType::ADMIN)
+                @if(auth()->user()?->isAdmin())
                 <!-- Excel Import and Receive -->
                 <div class="position-relative d-inline-block ml-2">
                     <form action="{{ route('purchase-orders.import', ['receive' => 'true']) }}" method="POST" enctype="multipart/form-data">

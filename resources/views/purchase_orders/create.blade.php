@@ -176,14 +176,6 @@
         }
         itemSelect.trigger('change');
 
-        $('#item_id').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var supplierId = selectedOption.attr('data-supplier');
-            if (supplierId) {
-                $('#supplier_id').val(supplierId).trigger('change.select2');
-            }
-        });
-
         $('#add_to_list').click(function() {
             var itemSelect = $('#item_id');
             var itemId = itemSelect.val();
@@ -201,7 +193,6 @@
                 return;
             }
 
-            $('#supplier_id').attr('readonly', true);
             var total = qty * cost;
             var row = `<tr>
                 <td class="py-1 px-2 text-center"><button class="btn btn-outline-danger btn-sm rem_row" type="button"><i class="fa fa-times"></i></button></td>

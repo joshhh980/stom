@@ -10,8 +10,8 @@
         <dd class="pl-3">{{ $item->supplier_id ?? 'N/A' }}</dd>
         <dt class="text-info">Status:</dt>
         <dd class="pl-3">
-            <span class="badge badge-{{ $item->status->value ? 'success' : 'danger' }} rounded-pill">
-                {{ $item->status->value ? 'Active' : 'Inactive' }}
+            <span class="badge badge-{{ $item->isActive() ? 'success' : 'danger' }} rounded-pill">
+                {{ $item->isActive() ? 'Active' : 'Inactive' }}
             </span>
         </dd>
     </dl>

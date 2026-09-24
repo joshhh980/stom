@@ -73,7 +73,7 @@
                             </li>
 
                             <!-- Maintenance Check (Admin Only) -->
-                            @if(auth()->user() && auth()->user()->type == \App\Enums\UserType::ADMIN)
+                            @if(auth()->user()?->isAdmin())
                                 <li class="nav-header">Maintenance</li>
                                 
                                 <!-- Supplier List -->

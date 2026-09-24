@@ -45,7 +45,7 @@
 						<td>{{ \Carbon\Carbon::parse($item->date_created)->format('Y-m-d H:i') }}</td>
 						<td>{{ $item->name }}</td>
 						<td class="text-center">
-                                @if($item->status->value === 1)
+								@if($item->isActive())
                                     <span class="badge badge-success rounded-pill">Active</span>
                                 @else
                                     <span class="badge badge-danger rounded-pill">Inactive</span>

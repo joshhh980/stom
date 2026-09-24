@@ -19,7 +19,7 @@
                         <dd class="pl-3">{{ $supplier->contact ?? '' }}</dd>
                         <dt class="text-info">Status:</dt>
                         <dd class="pl-3">
-                            @if($supplier->status === \App\Enums\Status::ACTIVE)
+                            @if($supplier->isActive())
                                 <span class="badge badge-success rounded-pill">Active</span>
                             @else
                                 <span class="badge badge-danger rounded-pill">Inactive</span>

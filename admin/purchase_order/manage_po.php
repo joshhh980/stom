@@ -331,7 +331,6 @@ if(isset($_GET['id'])){
             $('[name="discount_perc"],[name="tax_perc"]').on('input',function(){
                 calc()
             })
-            $('#supplier_id').attr('readonly','readonly')
         })
         $('#po-form').submit(function(e){
 			e.preventDefault();

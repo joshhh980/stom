@@ -17,4 +17,9 @@ trait HasActiveStatus
     {
         return $query->where('status',  Status::ACTIVE)->orderBy('name', 'asc');
     }
+
+    public function isActive(): bool
+    {
+        return $this->status === Status::ACTIVE;
+    }
 }

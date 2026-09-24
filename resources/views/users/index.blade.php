@@ -46,7 +46,7 @@
                                 </td>
                                 <td>{{ ucwords(trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''))) }}</td>
                                 <td><p class="m-0 truncate-1">{{ $user->username }}</p></td>
-                                <td><p class="m-0">{{ $user->type == \App\Enums\UserType::ADMIN->value ? 'Administrator' : 'Staff' }}</p></td>
+                                <td><p class="m-0">{{ $user->isAdmin() ? 'Administrator' : 'Staff' }}</p></td>
                                 <td align="center">
                                     <button type="button" class="btn btn-flat btn-default btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                         Action
