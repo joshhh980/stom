@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Actions\ProcessReceivingStock;
 use App\Http\Controllers\Controller;
 use App\Models\Receiving;
+use App\Models\AuditLog;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use App\Http\Requests\SaveReceivingRequest;
 use App\Models\ReceivingOrder;
@@ -38,6 +40,10 @@ class ReceivingController extends Controller
         $receiving = $action->execute($request->validated());
 
         $isNew = empty($request->input('id'));
+        AuditLog::record(
+            $isNew ? 'Receive Stock' : 'Update Received Stock',
+            ($isNew ? 'Processed new inventory receiving entry' : 'Updated details for inventory receiving entry') . " (ID: {$receiving->id})"
+        );
         session()->flash(
             'success',
             $isNew
@@ -150,5 +156,37 @@ class ReceivingController extends Controller
         $computedSubTotal = $stocks->sum('total');
 
         return view('receivings.show', compact('receiving', 'stocks', 'computedSubTotal'));
+    }
+
+    public function destroy(Receiving $receiving): JsonResponse
+    {
+        $stockIds = array_filter(explode(',', (string) $receiving->stock_ids));
+
+        if ($receiving->backOrdersCreated()->exists()) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'This receiving record cannot be deleted because it has generated a back order.',
+            ], 422);
+        }
+
+        if ($stockIds && Sale::where(function ($query) use ($stockIds) {
+            foreach ($stockIds as $stockId) {
+                $query->orWhereRaw('FIND_IN_SET(?, stock_ids)', [$stockId]);
+            }
+        })->exists()) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'This receiving record cannot be deleted because its stock has been used in a sale.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($receiving, $stockIds) {
+            Stock::whereIn('id', $stockIds)->where('type', 1)->delete();
+            $receiving->delete();
+        });
+
+        AuditLog::record('Delete Received Stock', "Deleted receiving record ID: {$receiving->id} and linked stock records.");
+
+        return response()->json(['status' => 'success']);
     }
 }

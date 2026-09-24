@@ -6,12 +6,14 @@ use App\Actions\CreatePurchaseOrder;
 use App\Actions\ImportPurchaseOrder;
 use App\Actions\UpdatePurchaseOrder;
 use App\Http\Requests\PurchaseOrderRequest;
+use App\Models\AuditLog;
 use App\Models\Item;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PurchaseOrderController extends Controller
@@ -55,6 +57,7 @@ class PurchaseOrderController extends Controller
     {
         $po = $createAction->execute($request);
 
+        AuditLog::record('Create Purchase Order', "Created PO Code: {$po->po_code} (ID: {$po->id})");
         session()->flash('success', 'New Purchase Order was Successfully created.');
         return response()->json(['status' => 'success', 'id' => $po->id]);
     }
@@ -67,6 +70,7 @@ class PurchaseOrderController extends Controller
     ): JsonResponse {
         $po = $updateAction->execute($purchaseOrder, $request);
 
+        AuditLog::record('Update Purchase Order', "Updated PO Code: {$po->po_code} (ID: {$po->id})");
         session()->flash('success', "Purchase Order's Details Successfully updated.");
         return response()->json(['status' => 'success', 'id' => $po->id]);
     }
@@ -75,7 +79,16 @@ class PurchaseOrderController extends Controller
     public function destroy(PurchaseOrder $purchaseOrder): JsonResponse
     {
         if ($purchaseOrder->isPending()) {
-            $purchaseOrder->delete();
+            DB::transaction(function () use ($purchaseOrder) {
+                $purchaseOrder->items()->detach();
+                $purchaseOrder->backOrders()->each(function ($backOrder) {
+                    $backOrder->items()->detach();
+                    $backOrder->delete();
+                });
+                $purchaseOrder->delete();
+            });
+
+            AuditLog::record('Delete Purchase Order', "Deleted PO Code: {$purchaseOrder->po_code} (ID: {$purchaseOrder->id})");
             return response()->json(['status' => 'success']);
         }
 
@@ -93,6 +106,8 @@ class PurchaseOrderController extends Controller
     {
         try {
             $importAction->execute($request);
+
+            AuditLog::record('Import Purchase Orders', 'Imported purchase order data from a spreadsheet.');
 
             return response()->json([
                 'status'  => 'success',

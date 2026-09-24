@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\Item;
+use App\Models\AuditLog;
 use Carbon\Carbon;
 use App\Models\Stock;
 use App\Enums\Status;
@@ -67,7 +68,12 @@ class StockController extends Controller
             'batch_no'    => $validated['batch_no'],
         ];
 
-        Stock::updateOrCreate(['id' => $validated['id'] ?? null], $stockData);
+        $stock = Stock::updateOrCreate(['id' => $validated['id'] ?? null], $stockData);
+
+        AuditLog::record(
+            'Manual Stock Entry',
+            "Added manual stock adjustment entry. Item ID: {$stock->item_id}, Qty: {$stock->quantity}, Batch: " . ($stock->batch_no ?: 'None')
+        );
 
         return response()->json(['status' => 'success']);
     }

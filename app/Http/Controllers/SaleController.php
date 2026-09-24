@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
+use App\Models\AuditLog;
 use App\Models\Item;
 use App\Models\Stock;
 use App\Enums\Status;
@@ -21,15 +22,38 @@ class SaleController extends Controller
         return view('sales.index', compact('sales'));
     }
 
+    public function show(Sale $sale)
+    {
+        $stocks = $this->saleStocks($sale);
+
+        return view('sales.show', compact('sale', 'stocks'));
+    }
+
+    public function edit(Sale $sale)
+    {
+        return $this->createOrEdit($sale->id);
+    }
+
     public function destroy(int $id): JsonResponse
     {
         $sale = Sale::findOrFail($id);
+        $stockIds = array_filter(explode(',', (string) $sale->stock_ids));
 
-        if (!empty(trim($sale->stock_ids))) {
-            Stock::whereIn('id', explode(',', $sale->stock_ids))->delete();
+        if ($stockIds && Stock::whereIn('id', $stockIds)
+            ->where('type', '!=', StockType::OUT->value)
+            ->exists()) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'This sale cannot be deleted because its stock links are invalid.',
+            ], 422);
         }
 
-        $sale->delete();
+        DB::transaction(function () use ($sale, $stockIds) {
+            Stock::whereIn('id', $stockIds)->where('type', StockType::OUT->value)->delete();
+            $sale->delete();
+        });
+
+        AuditLog::record('Delete Sale', "Deleted sales record Code: {$sale->sales_code} (ID: {$sale->id})");
 
         return response()->json(['status' => 'success']);
     }
@@ -133,10 +157,12 @@ class SaleController extends Controller
                     ? Carbon::parse($validated['date_created'])
                     : Carbon::now();
 
-                $sale = Sale::updateOrCreate(
-                    ['id' => $id],
-                    [
-                        'sales_code' => $salesCode,
+                    $existingSale = $id ? Sale::findOrFail($id) : null;
+
+                    $sale = Sale::updateOrCreate(
+                        ['id' => $id],
+                        [
+                            'sales_code' => $existingSale?->sales_code ?? $salesCode,
                         'client' => $validated['client']
                             ?? 'Guest Customer',
                         'remarks' => $validated['remarks']
@@ -154,10 +180,9 @@ class SaleController extends Controller
                     !$isNew &&
                     !empty(trim($sale->stock_ids))
                 ) {
-                    Stock::whereIn(
-                        'id',
-                        explode(',', $sale->stock_ids)
-                    )->delete();
+                    Stock::whereIn('id', explode(',', $sale->stock_ids))
+                        ->where('type', StockType::OUT->value)
+                        ->delete();
                 }
 
                 /*
@@ -170,7 +195,7 @@ class SaleController extends Controller
                         'item_id' => $itemId,
                         'quantity' => $validated['qty'][$k],
                         'price' => $validated['price'][$k],
-                        'total' => $validated['total'][$k],
+                        'total' => $validated['qty'][$k] * $validated['price'][$k],
                         'type' => StockType::OUT->value,
                     ]);
 
@@ -183,8 +208,13 @@ class SaleController extends Controller
                  */
                 $sale->update([
                     'stock_ids' => implode(',', $stockIds),
-                    'amount' => array_sum($validated['total']),
+                    'amount' => $this->calculateTotal($validated),
                 ]);
+
+                AuditLog::record(
+                    $isNew ? 'Create Sale' : 'Update Sale',
+                    ($isNew ? 'Created' : 'Updated') . " sales record Code: {$sale->sales_code} (ID: {$sale->id})"
+                );
 
                 return response()->json([
                     'status' => 'success',
@@ -193,10 +223,26 @@ class SaleController extends Controller
             });
 
         } catch (\Exception $e) {
+            AuditLog::record('Save Sale [FAILED]', 'Failed to save sale transaction.');
             return response()->json([
                 'status' => 'failed',
                 'msg' => 'Failed to save sale: ' . $e->getMessage(),
             ], 422);
         }
+    }
+
+    private function saleStocks(Sale $sale)
+    {
+        return Stock::with('item')
+            ->whereIn('id', array_filter(explode(',', (string) $sale->stock_ids)))
+            ->where('type', StockType::OUT->value)
+            ->get();
+    }
+
+    private function calculateTotal(array $validated): float
+    {
+        return collect($validated['qty'])
+            ->map(fn ($quantity, $index) => $quantity * ($validated['price'][$index] ?? 0))
+            ->sum();
     }
 }

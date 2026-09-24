@@ -72,6 +72,13 @@ class ItemController extends Controller
 
     public function destroy(Item $item): JsonResponse
     {
+        if ($item->stocks()->exists() || $item->purchaseOrders()->exists() || $item->backOrders()->exists()) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'This item cannot be deleted because it is referenced by stock or transaction records.',
+            ], 422);
+        }
+
         try {
             $item->delete();
         } catch (\Throwable $exception) {

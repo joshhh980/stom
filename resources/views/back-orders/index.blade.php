@@ -58,7 +58,7 @@
                                 </button>
                                 <div class="dropdown-menu" role="menu">
                                     @if($row->isPending())
-                                        <a class="dropdown-item" href="{{ route('receivings.index', ['bo_id' => $row->id]) }}">
+                                        <a class="dropdown-item" href="{{ route('receivings.manage', ['bo_id' => $row->id]) }}">
                                             <span class="fa fa-boxes text-dark"></span> Receive
                                         </a>
                                         <div class="dropdown-divider"></div>
