@@ -3,11 +3,15 @@
 @section('content')
 <style>
     body {
-        background-image: url("{{ asset(config('settings.cover', 'assets/cover.jpg')) }}");
-        background-size: cover; background-repeat: no-repeat;
+        background-image: url("{{ asset(config('settings.cover', 'assets/cover.jpg')) }}") !important;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
     }
     .login-title { text-shadow: 2px 2px black; }
-    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: transparent !important; }
 </style>
 
 <div class="login-page dark-mode">

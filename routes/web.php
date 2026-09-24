@@ -23,11 +23,11 @@ Route::middleware('auth')->group(function () {
     Route::get('sales/manage/{id?}', [Controllers\SaleController::class, 'createOrEdit'])->name('sales.manage');
     Route::resource('sales', Controllers\SaleController::class);
 
-    Route::resource('suppliers', Controllers\SupplierController::class);    
-    
-    Route::resource('/items', Controllers\ItemController::class);
-    Route::get('/users', [Controllers\DashboardController::class, 'users'])->name('users.index');
-    Route::get('/settings', [Controllers\DashboardController::class, 'settings'])->name('settings.index');
+    Route::resource('suppliers', Controllers\SupplierController::class);
+    Route::resource('items', Controllers\ItemController::class);
+    Route::resource('users', Controllers\UserController::class);
+    Route::get('/settings', [Controllers\SystemSettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [Controllers\SystemSettingsController::class, 'update'])->name('settings.update');
 });
 
 require __DIR__ . '/auth.php';
