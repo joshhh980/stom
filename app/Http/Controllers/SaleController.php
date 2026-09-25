@@ -65,6 +65,16 @@ class SaleController extends Controller
     {
         $sale = $id ? Sale::findOrFail($id) : null;
 
+        $currentItems = collect();
+        $currentItemIds = [];
+
+        if ($sale && !empty(trim($sale->stock_ids))) {
+            $currentItems = Stock::with('item')
+                ->whereIn('id', explode(',', $sale->stock_ids))
+                ->get();
+            $currentItemIds = $currentItems->pluck('item_id')->all();
+        }
+
         /*
          * Pull active items with their stock movement totals.
          *
@@ -89,16 +99,8 @@ class SaleController extends Controller
 
                 return $item;
             })
-            ->filter(fn($item) => $item->available_stock > 0)
+            ->filter(fn($item) => $item->available_stock > 0 || in_array($item->id, $currentItemIds))
             ->keyBy('id');
-
-        $currentItems = collect();
-
-        if ($sale && !empty(trim($sale->stock_ids))) {
-            $currentItems = Stock::with('item')
-                ->whereIn('id', explode(',', $sale->stock_ids))
-                ->get();
-        }
 
         return view(
             'sales.manage',

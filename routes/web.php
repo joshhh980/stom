@@ -7,6 +7,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [Controllers\DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/profile', [Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [Controllers\ProfileController::class, 'update'])->name('profile.update');
+
 
     Route::resource('purchase-orders', Controllers\PurchaseOrderController::class);
     Route::post('purchase-orders/import', [Controllers\PurchaseOrderController::class, "import"])->name('purchase-orders.import');

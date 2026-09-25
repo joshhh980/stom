@@ -62,7 +62,7 @@
                     <div id="item_picker">
                         <div id="item_grid">
                             @foreach($items as $item)
-                            <div class="item-card" data-id="{{ $item->id }}" data-name="{{ strtolower($item->name) }}">
+                            <div class="item-card {{ $currentItems->contains('item_id', $item->id) ? 'in-cart' : '' }}" data-id="{{ $item->id }}" data-name="{{ strtolower($item->name) }}">
                                 <span class="name">{{ $item->name }}</span>
                                 <span class="price">GHS {{ number_format($item->cost, 2) }}</span><br>
                                 <span class="stock-tag {{ $item->available_stock <= 5 ? 'low' : 'ok' }}">
@@ -296,13 +296,11 @@
             }
         })
 
-        if ('<?php echo isset($id) && $id > 0 ?>' == 1) {
-            calc();
-            refreshCartBadges();
-            $('table#list tbody tr .rem_row').click(function() {
-                rem($(this))
-            })
-        }
+        calc();
+        refreshCartBadges();
+        $('table#list tbody tr[data-id] .rem_row').click(function() {
+            rem($(this))
+        })
     })
 
     function addOrIncrementItem(item) {
@@ -417,12 +415,11 @@
             grandTotal += qty * price;
         });
 
-        // Update the grand total elements in your UI
-        // Adjust selectors below to match your HTML footer structure (e.g., #grand-total)
-        $('#grand-total').text('GHS ' + grandTotal.toLocaleString('en-US', {
+        var formattedTotal = 'GHS ' + grandTotal.toLocaleString('en-US', {
             minimumFractionDigits: 2
-        }));
-        $('[name="grand_total"]').val(grandTotal);
+        });
+
+        $('.grand-total, #header-total').text(formattedTotal);
     }
 </script>
 @endpush

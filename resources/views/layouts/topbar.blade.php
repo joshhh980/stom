@@ -44,7 +44,7 @@
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <div class="dropdown-menu" role="menu">
-                    <a class="dropdown-item" href="#">
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
                         <span class="fa fa-user"></span> My Account
                     </a>
                     <div class="dropdown-divider"></div>
