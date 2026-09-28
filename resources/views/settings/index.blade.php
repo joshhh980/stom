@@ -42,6 +42,10 @@
                     <input type="text" class="form-control form-control-sm" name="short_name" id="short_name" value="{{ old('short_name', $settings['short_name'] ?? '') }}">
                 </div>
                 <div class="form-group">
+                    <label for="currency" class="control-label">Currency Code or Symbol</label>
+                    <input type="text" class="form-control form-control-sm" name="currency" id="currency" maxlength="10" value="{{ old('currency', $settings['currency'] ?? 'GHS') }}" required>
+                </div>
+                <div class="form-group">
                     <label for="customFile" class="control-label">System Logo</label>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input rounded-circle" id="customFile" name="img" onchange="displayImg(this,$(this))">

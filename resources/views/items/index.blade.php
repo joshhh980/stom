@@ -14,17 +14,9 @@
 <div class="card card-outline card-primary">
 	<div class="card-header">
 		<h3 class="card-title">List of Item</h3>
-        <div class="card-tools d-flex justify-content-between">
+		<div class="card-tools">
 			<div>
 				<a href="javascript:void(0)" id="create_new" class="btn btn-flat btn-primary"><span class="fas fa-plus"></span>  Add New</a>
-			</div>
-			<div class="ml-2">
-				<a href="javascript:void(0)" class="btn btn-flat btn-primary">Export Products</a>
-			</div>
-			<div class="position-relative d-inline-block ml-2">
-				<form action="javascript:void(0)" method="POST" enctype="multipart/form-data">
-					<button class="btn btn-flat btn-primary position-relative" type="submit">Update Item Costs</button>
-				</form>
 			</div>
 		</div>
 	</div>

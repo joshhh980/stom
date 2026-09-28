@@ -20,7 +20,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('stocks', Controllers\StockController::class)->only(['index', 'store']);
     Route::get('stocks/manage', [Controllers\StockController::class, 'createOrEdit'])->name('stocks.manage');
-    Route::post('stocks/import', [Controllers\StockController::class, "import"])->name('stocks.import');
 
 
     Route::get('sales/manage/{id?}', [Controllers\SaleController::class, 'createOrEdit'])->name('sales.manage');

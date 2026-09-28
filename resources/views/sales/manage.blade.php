@@ -19,7 +19,7 @@
             {{ isset($sale) ? "Sale Details - " . $sale->sales_code : 'Create New Sale Record' }}
         </h4>
         <span class="badge badge-primary" style="font-size:14px;" id="header-total">
-            GHS {{ number_format($sale->amount ?? 0, 2) }}
+            {{ config('settings.currency', 'GHS') }} {{ number_format($sale->amount ?? 0, 2) }}
         </span>
     </div>
     <div class="card-body">
@@ -64,7 +64,7 @@
                             @foreach($items as $item)
                             <div class="item-card {{ $currentItems->contains('item_id', $item->id) ? 'in-cart' : '' }}" data-id="{{ $item->id }}" data-name="{{ strtolower($item->name) }}">
                                 <span class="name">{{ $item->name }}</span>
-                                <span class="price">GHS {{ number_format($item->cost, 2) }}</span><br>
+                                <span class="price">{{ config('settings.currency', 'GHS') }} {{ number_format($item->cost, 2) }}</span><br>
                                 <span class="stock-tag {{ $item->available_stock <= 5 ? 'low' : 'ok' }}">
                                     {{ number_format($item->available_stock) }} in stock
                                 </span>
@@ -115,13 +115,13 @@
                             <!-- Price inputs belong in the price cell -->
                             <td class="py-1 px-2 text-right editable-cell price-cell" data-value="{{ $row->price }}">
                                 <input type="hidden" name="price[]" value="{{ $row->price }}">
-                                <span class="cell-display">GHS {{ number_format($row->price, 2) }}</span>
+                                <span class="cell-display">{{ config('settings.currency', 'GHS') }} {{ number_format($row->price, 2) }}</span>
                             </td>
 
                             <!-- Total inputs belong in the total cell -->
                             <td class="py-1 px-2 text-right total">
                                 <input type="hidden" name="total[]" value="{{ $row->total }}">
-                                <span class="cell-display-total">GHS {{ number_format($row->total, 2) }}</span>
+                                <span class="cell-display-total">{{ config('settings.currency', 'GHS') }} {{ number_format($row->total, 2) }}</span>
                             </td>
                         </tr>
                         @empty
@@ -134,7 +134,7 @@
                     <tfoot>
                         <tr>
                             <th class="text-right py-1 px-2" colspan="3">Total</th>
-                            <th class="text-right py-1 px-2 grand-total" colspan="2">GHS {{ number_format($sale->amount ?? 0, 2) }}</th>
+                            <th class="text-right py-1 px-2 grand-total" colspan="2">{{ config('settings.currency', 'GHS') }} {{ number_format($sale->amount ?? 0, 2) }}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -185,6 +185,7 @@
 @push('scripts')
 <script>
     var items = @js($items);
+    var currencyCode = @js(config('settings.currency', 'GHS'));
     var MARGIN_PERCENT = 20;
 
 
@@ -330,12 +331,12 @@
 
             var priceCell = tr.find('.price-cell');
             priceCell.data('value', suggestedPrice).attr('data-value', suggestedPrice);
-            priceCell.find('.cell-display').text('GHS ' + suggestedPrice.toFixed(2));
+            priceCell.find('.cell-display').text(currencyCode + ' ' + suggestedPrice.toFixed(2));
             qtyCell.find('[name="price[]"]').val(suggestedPrice);
 
             var total = suggestedPrice * 1;
             qtyCell.find('[name="total[]"]').val(total);
-            tr.find('.total').text('GHS ' + total.toLocaleString('en-US', {
+            tr.find('.total').text(currencyCode + ' ' + total.toLocaleString('en-US', {
                 minimumFractionDigits: 2
             }));
 
@@ -362,7 +363,7 @@
             var stock = items[item] ? parseFloat(items[item].stock) || 0 : null;
             tr.toggleClass('row-warning', stock !== null && value > stock);
         } else if (cell.hasClass('price-cell')) {
-            cell.find('.cell-display').text('GHS ' + parseFloat(value).toFixed(2));
+            cell.find('.cell-display').text(currencyCode + ' ' + parseFloat(value).toFixed(2));
             tr.find('[name="price[]"]').val(value);
         }
 
@@ -370,7 +371,7 @@
         var price = parseFloat(tr.find('[name="price[]"]').val()) || 0;
         var total = qty * price;
         tr.find('[name="total[]"]').val(total);
-        tr.find('.total').text('GHS ' + total.toLocaleString('en-US', {
+        tr.find('.total').text(currencyCode + ' ' + total.toLocaleString('en-US', {
             minimumFractionDigits: 2
         }));
 
@@ -415,7 +416,7 @@
             grandTotal += qty * price;
         });
 
-        var formattedTotal = 'GHS ' + grandTotal.toLocaleString('en-US', {
+        var formattedTotal = currencyCode + ' ' + grandTotal.toLocaleString('en-US', {
             minimumFractionDigits: 2
         });
 

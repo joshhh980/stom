@@ -24,14 +24,6 @@
                     <span class="fas fa-plus"></span> Add to Stock
                 </a>
             </div>
-           <!-- <div class="position-relative d-inline-block ml-2">
-                <form action="{{ route('stocks.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="file" name="excel_file" accept=".xlsx, .xls, .csv" required>
-                    <button class="btn btn-flat btn-primary position-relative" type="submit">Upload Stock</button>
-                </form>
-            </div>
--->
         @endif
     </div>
     <div class="card-body">

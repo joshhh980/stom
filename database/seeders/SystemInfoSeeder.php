@@ -12,6 +12,7 @@ class SystemInfoSeeder extends Seeder
         $defaults = [
             'name' => 'Stock Management System - PHP',
             'short_name' => 'SMS- PHP',
+            'currency' => 'GHS',
             'logo' => 'uploads/logo-1635816671.png',
             'cover' => 'uploads/cover-1635816671.png',
         ];

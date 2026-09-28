@@ -22,6 +22,7 @@ class SystemSettingsController extends Controller
     {
         SystemInfo::setValue('name', $request->validated('name'));
         SystemInfo::setValue('short_name', $request->validated('short_name'));
+        SystemInfo::setValue('currency', $request->validated('currency'));
 
         $this->storeImage($request->file('img'), 'logo', [200, 200], $uploadImage);
         $this->storeImage($request->file('cover'), 'cover', [1280, 720], $uploadImage);
