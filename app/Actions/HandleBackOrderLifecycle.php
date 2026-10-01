@@ -37,7 +37,7 @@ class HandleBackOrderLifecycle
 
         $boMasterData = [
             'receiving_id'  => $receiving->id,
-            'po_id'         => ($data['from_order'] == ReceivingOrigin::BACK_ORDER->value) ? $data['form_id'] : $data['po_id'],
+            'po_id'         => $data['po_id'],
             'supplier_id'   => $data['supplier_id'],
             'discount_perc' => $data['discount_perc'] ?? 0,
             'tax_perc'      => $data['tax_perc'] ?? 0,

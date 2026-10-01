@@ -31,6 +31,7 @@ class PurchaseOrderTest extends DuskTestCase
             $browser->loginAs($admin)
                 ->visitRoute('purchase-orders.create')
                 ->waitFor('#po-form')
+                ->select('#supplier_id', (string) $item1->supplier_id)
 
                 // Add FIRST Item (Qty: 2)
                 ->select('#item_id', $item1->id)
