@@ -115,7 +115,9 @@ if($qry->num_rows >0){
         </div>
     </div>
     <div class="card-footer py-1 text-center">
+        <!--
         <a class="btn btn-flat btn-primary" href="<?php echo base_url.'/admin?page=receiving/manage_receiving&id='.(isset($id) ? $id : '') ?>">Edit</a>
+        -->
         <a class="btn btn-flat btn-dark" href="<?php echo base_url.'/admin?page=receiving' ?>">Back To List</a>
     </div>
 </div>

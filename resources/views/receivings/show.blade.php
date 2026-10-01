@@ -21,7 +21,7 @@
                     </div>
                 </div>
 
-                @if($receiving->from_order == \App\Enums\ReceivingOrigin::BACK_ORDER->value && isset($receiving->orderSource->bo_code))
+                @if($receiving->isFromBackOrder() && isset($receiving->orderSource->bo_code))
                 <div class="col-md-6">
                     <label class="control-label text-info">FROM B.O. Code</label>
                     <div>{{ $receiving->orderSource->bo_code }}</div>
@@ -109,9 +109,11 @@
     </div>
 
     <div class="card-footer py-2 text-center">
+        {{--
         <a class="btn btn-flat btn-primary" href="{{ route('receivings.manage', ['id' => $receiving->id]) }}">
             <i class="fa fa-edit"></i> Edit
         </a>
+        --}}
         <a class="btn btn-flat btn-dark" href="{{ route('receivings.index') }}">
             Back To List
         </a>

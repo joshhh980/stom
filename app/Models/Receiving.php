@@ -65,9 +65,33 @@ class Receiving extends Model
     /**
      * Get the origin order source (PurchaseOrder or BackOrder) dynamically.
      */
+    /**
+     * Check whether this receiving record originates from a given enum value.
+     */
+    public function isFrom(ReceivingOrigin $origin): bool
+    {
+        return $this->from_order === $origin;
+    }
+
+    /**
+     * Check whether this receiving originated from a purchase order.
+     */
+    public function isFromPurchaseOrder(): bool
+    {
+        return $this->isFrom(ReceivingOrigin::PURCHASE_ORDER);
+    }
+
+    /**
+     * Check whether this receiving originated from a back order.
+     */
+    public function isFromBackOrder(): bool
+    {
+        return $this->isFrom(ReceivingOrigin::BACK_ORDER);
+    }
+
     public function orderSource(): BelongsTo
     {
-        if ($this->from_order === ReceivingOrigin::PURCHASE_ORDER) {
+        if ($this->isFromPurchaseOrder()) {
             return $this->belongsTo(PurchaseOrder::class, 'form_id');
         }
 
@@ -79,7 +103,7 @@ class Receiving extends Model
      */
     public function getSourceCodeAttribute(): string
     {
-        if ($this->from_order === ReceivingOrigin::PURCHASE_ORDER) {
+        if ($this->isFromPurchaseOrder()) {
             return $this->orderSource->po_code ?? 'N/A';
         }
 

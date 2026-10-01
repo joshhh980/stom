@@ -78,7 +78,7 @@ class ReceivingController extends Controller
             $receiving = Receiving::findOrFail($id);
             $supplierId = $receiving->supplier_id;
 
-            if ($receiving->from_order == ReceivingOrigin::PURCHASE_ORDER->value) {
+            if ($receiving->isFromPurchaseOrder()) {
                 $orderSource = PurchaseOrder::with(['supplier', 'items'])->find($receiving->form_id);
                 $poId = $orderSource->id;
                 $poCode = $orderSource->po_code;
