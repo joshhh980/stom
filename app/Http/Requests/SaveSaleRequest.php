@@ -20,8 +20,11 @@ class SaveSaleRequest extends FormRequest
             'client'    => 'required|string|max:255',
             'remarks'   => 'nullable|string|max:1000',
             'item_id'   => 'required|array|min:1',
+            'item_id.*' => 'required|integer|exists:item_list,id',
             'qty'       => 'required|array|min:1',
+            'qty.*'     => 'required|numeric|min:0',
             'price'     => 'required|array|min:1',
+            'price.*'   => 'required|numeric|min:0',
             'total'     => 'required|array|min:1',
         ];
 

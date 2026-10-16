@@ -62,11 +62,11 @@
                     <div id="item_picker">
                         <div id="item_grid">
                             @foreach($items as $item)
-                            <div class="item-card {{ $currentItems->contains('item_id', $item->id) ? 'in-cart' : '' }}" data-id="{{ $item->id }}" data-name="{{ strtolower($item->name) }}">
+                            <div class="item-card {{ $currentItems->contains('item_id', $item->id) ? 'in-cart' : '' }}" data-id="{{ $item->id }}" data-name="{{ strtolower($item->name) }}" data-max-quantity="{{ $item->max_sale_quantity }}">
                                 <span class="name">{{ $item->name }}</span>
                                 <span class="price">{{ config('settings.currency', 'GHS') }} {{ number_format($item->cost, 2) }}</span><br>
-                                <span class="stock-tag {{ $item->available_stock <= 5 ? 'low' : 'ok' }}">
-                                    {{ number_format($item->available_stock) }} in stock
+                                <span class="stock-tag {{ $item->available_stock <= 0 ? 'out' : ($item->available_stock <= 5 ? 'low' : 'ok') }}">
+                                    {{ $item->available_stock > 0 ? number_format($item->available_stock) . ' in stock' : 'Out of stock' }}
                                 </span>
                             </div>
                             @endforeach
@@ -113,9 +113,11 @@
                             </td>
 
                             <!-- Price inputs belong in the price cell -->
-                            <td class="py-1 px-2 text-right editable-cell price-cell" data-value="{{ $row->price }}">
-                                <input type="hidden" name="price[]" value="{{ $row->price }}">
-                                <span class="cell-display">{{ config('settings.currency', 'GHS') }} {{ number_format($row->price, 2) }}</span>
+                            <td class="py-1 px-2 text-right price-cell" data-value="{{ $row->price }}">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend"><span class="input-group-text">{{ config('settings.currency', 'GHS') }}</span></div>
+                                    <input type="number" name="price[]" class="form-control price-input" min="0" step="0.01" required value="{{ $row->price }}" aria-label="Price for {{ $row->item->name }}">
+                                </div>
                             </td>
 
                             <!-- Total inputs belong in the total cell -->
@@ -171,12 +173,14 @@
         <td class="py-1 px-2 text-center editable-cell qty-cell" data-value="0">
             <input type="hidden" name="item_id[]">
             <input type="hidden" name="qty[]">
-            <input type="hidden" name="price[]">
             <input type="hidden" name="total[]">
             <span class="cell-display"></span>
         </td>
-        <td class="py-1 px-2 text-right editable-cell price-cell" data-value="0">
-            <span class="cell-display"></span>
+        <td class="py-1 px-2 text-right price-cell" data-value="0">
+            <div class="input-group input-group-sm">
+                <div class="input-group-prepend"><span class="input-group-text">{{ config('settings.currency', 'GHS') }}</span></div>
+                <input type="number" name="price[]" class="form-control price-input" min="0" step="0.01" required value="0" aria-label="Item price">
+            </div>
         </td>
         <td class="py-1 px-2 text-right total"></td>
     </tr>
@@ -186,7 +190,7 @@
 <script>
     var items = @js($items);
     var currencyCode = @js(config('settings.currency', 'GHS'));
-    var MARGIN_PERCENT = 20;
+    var MARGIN_PERCENT = 50;
 
 
     $(function() {
@@ -203,6 +207,8 @@
         });
 
         $(document).on('click', '.item-card', function() {
+            if ($(this).hasClass('unavailable')) return;
+
             var item = String($(this).data('id'));
             addOrIncrementItem(item);
             var card = $(this);
@@ -246,6 +252,12 @@
                     commit();
                 }
             });
+        });
+
+        $(document).on('input', '.price-input', function() {
+            var input = $(this);
+            var value = parseFloat(input.val());
+            updateCellValue(input.closest('.price-cell'), isNaN(value) ? 0 : value);
         });
 
         $('#sale-form').submit(function(e) {
@@ -312,8 +324,12 @@
         if (existing.length > 0) {
             var qtyCell = existing.find('.qty-cell');
             var newQty = (parseFloat(qtyCell.data('value')) || 0) + 1;
+            var maxQuantity = parseFloat(itemData.max_sale_quantity) || 0;
+            if (newQty > maxQuantity) return;
             updateCellValue(qtyCell, newQty);
         } else {
+            if ((parseFloat(itemData.max_sale_quantity) || 0) < 1) return;
+
             $('#empty-row').remove();
             var cost = parseFloat(itemData.cost) || 0;
             var suggestedPrice = cost > 0 ? +(cost * (1 + MARGIN_PERCENT / 100)).toFixed(2) : 0;
@@ -331,8 +347,7 @@
 
             var priceCell = tr.find('.price-cell');
             priceCell.data('value', suggestedPrice).attr('data-value', suggestedPrice);
-            priceCell.find('.cell-display').text(currencyCode + ' ' + suggestedPrice.toFixed(2));
-            qtyCell.find('[name="price[]"]').val(suggestedPrice);
+            priceCell.find('[name="price[]"]').val(suggestedPrice);
 
             var total = suggestedPrice * 1;
             qtyCell.find('[name="total[]"]').val(total);
@@ -360,10 +375,9 @@
             tr.find('[name="qty[]"]').val(value);
 
             // soft warning if qty exceeds known stock
-            var stock = items[item] ? parseFloat(items[item].stock) || 0 : null;
+            var stock = items[item] ? parseFloat(items[item].max_sale_quantity) || 0 : null;
             tr.toggleClass('row-warning', stock !== null && value > stock);
         } else if (cell.hasClass('price-cell')) {
-            cell.find('.cell-display').text(currencyCode + ' ' + parseFloat(value).toFixed(2));
             tr.find('[name="price[]"]').val(value);
         }
 
@@ -393,6 +407,17 @@
     // Show a small badge on each card reflecting the qty currently in the cart
     function refreshCartBadges() {
         $('.item-card').removeClass('in-cart').find('.cart-badge').remove();
+        $('.item-card').each(function() {
+            var card = $(this);
+            var item = String(card.data('id'));
+            var maxQuantity = parseFloat(card.data('max-quantity')) || 0;
+            var row = $('table#list tbody').find('tr[data-id="' + item + '"]');
+            var qty = parseFloat(row.find('[name="qty[]"]').val()) || 0;
+            var cannotAdd = qty + 1 > maxQuantity + 0.000001;
+
+            card.toggleClass('unavailable', cannotAdd);
+            card.attr('aria-disabled', cannotAdd ? 'true' : 'false');
+        });
         $('table#list tbody tr[data-id]').each(function() {
             var item = $(this).attr('data-id');
             var qty = parseFloat($(this).find('[name="qty[]"]').val()) || 0;

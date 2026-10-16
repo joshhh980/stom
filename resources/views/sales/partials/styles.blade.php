@@ -29,6 +29,14 @@
         border-color: #b8c2cc;
     }
     .item-card:active { transform: translateY(0); }
+    .item-card.unavailable,
+    .item-card.unavailable:hover,
+    .item-card.unavailable:active {
+        cursor: not-allowed;
+        opacity: .6;
+        box-shadow: none;
+        transform: none;
+    }
     .item-card.in-cart { border-color: #007bff; background: #f0f7ff; }
     .item-card.pulse { animation: cardPulse .3s ease; }
     
@@ -60,6 +68,7 @@
     }
     .item-card .stock-tag.ok { background: #d4edda; color: #155724; }
     .item-card .stock-tag.low { background: #fff3cd; color: #856404; }
+    .item-card .stock-tag.out { background: #f8d7da; color: #721c24; }
     
     .item-card .cart-badge {
         position: absolute;

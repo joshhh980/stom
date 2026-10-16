@@ -71,9 +71,13 @@ class SaleController extends Controller
         if ($sale && !empty(trim($sale->stock_ids))) {
             $currentItems = Stock::with('item')
                 ->whereIn('id', explode(',', $sale->stock_ids))
+                ->where('type', StockType::OUT->value)
                 ->get();
             $currentItemIds = $currentItems->pluck('item_id')->all();
         }
+        $currentSaleQuantities = $currentItems
+            ->groupBy('item_id')
+            ->map(fn ($stocks) => $stocks->sum('quantity'));
 
         /*
          * Pull active items with their stock movement totals.
@@ -92,14 +96,18 @@ class SaleController extends Controller
             }], 'quantity')
             ->orderBy('name', 'asc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($currentSaleQuantities) {
                 $item->available_stock =
                     ($item->total_in ?? 0) -
                     ($item->total_out ?? 0);
+                $saleQuantity = $currentSaleQuantities->get($item->id, 0);
+                $item->max_sale_quantity = max(
+                    $item->available_stock + $saleQuantity,
+                    $saleQuantity
+                );
 
                 return $item;
             })
-            ->filter(fn($item) => $item->available_stock > 0 || in_array($item->id, $currentItemIds))
             ->keyBy('id');
 
         return view(
@@ -159,7 +167,65 @@ class SaleController extends Controller
                     ? Carbon::parse($validated['date_created'])
                     : Carbon::now();
 
-                    $existingSale = $id ? Sale::findOrFail($id) : null;
+                    $existingSale = $id ? Sale::lockForUpdate()->findOrFail($id) : null;
+
+                    $currentSaleStocks = $existingSale && !empty(trim($existingSale->stock_ids))
+                        ? Stock::whereIn('id', explode(',', $existingSale->stock_ids))
+                            ->where('type', StockType::OUT->value)
+                            ->get()
+                        : collect();
+                    $currentSaleQuantities = $currentSaleStocks
+                        ->groupBy('item_id')
+                        ->map(fn ($stocks) => $stocks->sum('quantity'));
+
+                    $requestedQuantities = [];
+                    foreach ($validated['item_id'] as $index => $itemId) {
+                        $requestedQuantities[$itemId] =
+                            ($requestedQuantities[$itemId] ?? 0) +
+                            (float) $validated['qty'][$index];
+                    }
+
+                    $itemIds = collect(array_keys($requestedQuantities))
+                        ->merge($currentSaleQuantities->keys())
+                        ->unique()
+                        ->sort()
+                        ->values();
+
+                    $lockedItems = Item::whereIn('id', $itemIds)
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->get()
+                        ->keyBy('id');
+
+                    $stockTotals = Stock::whereIn('item_id', $itemIds)
+                        ->selectRaw(
+                            'item_id, SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) as total_in, SUM(CASE WHEN type = ? THEN quantity ELSE 0 END) as total_out',
+                            [StockType::IN->value, StockType::OUT->value]
+                        )
+                        ->groupBy('item_id')
+                        ->get()
+                        ->keyBy('item_id');
+
+                    foreach ($requestedQuantities as $itemId => $requestedQuantity) {
+                        $currentQuantity = (float) $currentSaleQuantities->get($itemId, 0);
+                        $totals = $stockTotals->get($itemId);
+                        $availableQuantity =
+                            (float) ($totals->total_in ?? 0) -
+                            (float) ($totals->total_out ?? 0) +
+                            $currentQuantity;
+                        $maximumQuantity = max($currentQuantity, $availableQuantity);
+
+                        if ($requestedQuantity > $maximumQuantity + 0.000001) {
+                            $itemName = $lockedItems->get($itemId)?->name ?? 'Selected item';
+
+                            return response()->json([
+                                'status' => 'failed',
+                                'msg' => "Not enough stock for {$itemName}. A maximum of " .
+                                    number_format(max(0, $maximumQuantity), 2) .
+                                    ' units can be included in this sale.',
+                            ]);
+                        }
+                    }
 
                     $sale = Sale::updateOrCreate(
                         ['id' => $id],
