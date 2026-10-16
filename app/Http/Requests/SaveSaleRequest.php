@@ -25,7 +25,6 @@ class SaveSaleRequest extends FormRequest
             'qty.*'     => 'required|numeric|min:0',
             'price'     => 'required|array|min:1',
             'price.*'   => 'required|numeric|min:0',
-            'total'     => 'required|array|min:1',
         ];
 
         // Enforce backend validation rules based strictly on your UserType Enum
