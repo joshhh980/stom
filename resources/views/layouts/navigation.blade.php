@@ -108,13 +108,14 @@
                                     </a>
                                 </li>
 
-                                <!-- Audit Logs -->
+                                <!-- 
                                 <li class="nav-item">
                                     <a href="{{ route('audit-logs.index') }}" class="nav-link {{ request()->routeIs('audit-logs.*') ? 'active' : '' }}">
                                         <i class="nav-icon fas fa-history"></i>
                                         <p>Audit Logs</p>
                                     </a>
                                 </li>
+                                Audit Logs -->
                             @endif
 
                         </ul>
