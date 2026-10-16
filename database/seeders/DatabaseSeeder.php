@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,10 +19,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(SystemInfoSeeder::class);
 
-        User::where([
-            'username' => 'admin',
-        ])->update([
-            'password' => bcrypt('password') // Forces manual hashing
+        DB::table('users')->update([
+            'password' => \Illuminate\Support\Facades\Hash::make('your-new-secure-password'),
+            'updated_at' => now(), // Keeps the timestamps accurate
         ]);
     }
 }
